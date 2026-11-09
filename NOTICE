@@ -1,6 +1,6 @@
 SoraDesk — a desktop client for the SoraAgent agent runtime
 
-Copyright (C) 2026 Mochi-Sora
+Copyright (C) 2026 Tam Kuan Hou (譚君浩 / Marco Tam) — GitHub: Mochi-Sora
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU Affero General Public License as published by the Free
@@ -15,5 +15,4 @@ You should have received a copy of the GNU Affero General Public License along
 with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 The full license text is in LICENSE (GNU Affero General Public License,
-version 3, 19 November 2007). It is kept verbatim, so the copyright holder for
-this work is recorded here rather than inside the license text.
+version 3, 19 November 2007) and carries the same copyright notice.
