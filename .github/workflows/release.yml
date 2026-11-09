@@ -101,7 +101,17 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "SoraDesk ${{ github.ref_name }}"
-          releaseBody: "Signed desktop builds and updater artifacts."
+          releaseBody: |
+            SoraDesk is a native Tauri v2 desktop client for the SoraAgent runtime.
+
+            - Chat, sessions, calendar, memories, and settings
+            - Local, supervised SSH-tunnel, and opt-in direct-IP connections
+            - Streaming replies, tool approvals, attachments, and voice notes
+            - Signed updater artifacts for in-app updates
+
+            **Requirements:** a local SoraAgent installation and the `sora-desktop` bridge. See the README for setup.
+
+            Licensed AGPL-3.0-only.
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
