@@ -73,7 +73,8 @@ input entitlement.
 The updater endpoint is configured for `Mochi-Sora/SoraDesk`. If the repository lives
 somewhere else, update the URL in `src-tauri/tauri.conf.json` before releasing.
 
-Create the repository and push the initial commit once:
+The repository is already initialized and pushed. To recreate it from a fresh
+checkout:
 
 ```sh
 git init -b main

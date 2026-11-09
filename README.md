@@ -1,5 +1,7 @@
 # SoraDesk
 
+[![CI](https://github.com/Mochi-Sora/SoraDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Mochi-Sora/SoraDesk/actions/workflows/ci.yml)
+
 A desktop client for the [SoraAgent](https://github.com/Mochi-Sora/SoraAgent) agent
 runtime — chat, sessions, calendar, memories, and settings over **local**, **SSH**, or
 **direct IP** connections, built with Tauri v2 (Rust shell + vanilla TypeScript UI).
@@ -194,10 +196,11 @@ notarizes macOS when the Apple secrets are present, and uploads `latest.json`. S
 
 ## Not done yet
 
-- No GitHub remote has been created yet; the initial push and secrets are in
-  [`docs/release.md`](docs/release.md).
 - The updater feed only has content after the first published release.
-- Apple notarization and Windows Authenticode require your own signing secrets.
+- Release secrets are not configured yet: the updater private key
+  (`TAURI_SIGNING_PRIVATE_KEY`) and Apple signing/notarization credentials — see
+  [`docs/release.md`](docs/release.md).
+- Windows Authenticode requires its own certificate.
 
 ## Licence
 
