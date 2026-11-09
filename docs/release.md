@@ -68,6 +68,19 @@ The webview records voice notes, so `src-tauri/Info.plist` carries the microphon
 usage string and `src-tauri/Entitlements.plist` grants the hardened-runtime audio
 input entitlement.
 
+## Windows signing
+
+Windows Authenticode needs a code-signing certificate exported as a `.pfx`. The
+release workflow imports it on the Windows runner from `WINDOWS_CERTIFICATE`
+(base64-encoded `.pfx`) and `WINDOWS_CERTIFICATE_PASSWORD`, reads the resulting
+thumbprint, and writes it into `src-tauri/tauri.release.conf.json` for that build.
+It signs with SHA-256 and timestamps via `http://timestamp.digicert.com`; change the
+URL in the workflow if your certificate authority provides a different timestamp
+server.
+
+Without these secrets the Windows job still builds and uploads installers, but they
+are unsigned and SmartScreen will warn until the certificate builds reputation.
+
 ## GitHub repository and secrets
 
 The updater endpoint is configured for `Mochi-Sora/SoraDesk`. If the repository lives
