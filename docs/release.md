@@ -60,8 +60,17 @@ export APPLE_TEAM_ID="TEAMID"
 ```
 
 In CI the certificate is imported from `APPLE_CERTIFICATE` (base64-encoded `.p12`)
-and `APPLE_CERTIFICATE_PASSWORD`. Without these secrets the macOS job still produces
-an ad-hoc-signed draft build, but Gatekeeper will warn on other machines and the
+and `APPLE_CERTIFICATE_PASSWORD`. Export the certificate and its private key from
+Keychain Access as a `.p12`, then encode it:
+
+```sh
+openssl base64 -A -in DeveloperID.p12 -out apple-certificate-base64.txt
+```
+
+`APPLE_PASSWORD` is an app-specific password, not your Apple ID password. Creating
+the certificate requires a Mac and a paid Apple Developer account; the CI build runs
+on GitHub's macOS runner. Without these secrets the macOS job still produces an
+ad-hoc-signed draft build, but Gatekeeper will warn on other machines and the
 release is not notarized.
 
 The webview records voice notes, so `src-tauri/Info.plist` carries the microphone
@@ -80,6 +89,16 @@ server.
 
 Without these secrets the Windows job still builds and uploads installers, but they
 are unsigned and SmartScreen will warn until the certificate builds reputation.
+
+Encode the `.pfx` as a single line before adding it as a secret:
+
+```sh
+# Linux/macOS
+base64 -w0 certificate.pfx > windows-certificate-base64.txt
+
+# Windows PowerShell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("certificate.pfx")) | Set-Content windows-certificate-base64.txt
+```
 
 ## GitHub repository and secrets
 
