@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="tile" x1="512" y1="64" x2="512" y2="960" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1b2230"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="320" y1="210" x2="705" y2="815" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7aa2f7"/>
+      <stop offset="1" stop-color="#bb9af7"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="512" cy="500" r="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7aa2f7" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#7aa2f7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="212" fill="url(#tile)"/>
+  <rect x="64" y="64" width="896" height="896" rx="212" fill="url(#glow)"/>
+  <rect x="66" y="66" width="892" height="892" rx="210" fill="none" stroke="#ffffff" stroke-opacity="0.10" stroke-width="4"/>
+
+  <path
+    d="M 700 330
+       C 690 245 600 205 505 212
+       C 395 220 325 295 325 388
+       C 325 472 392 520 482 555
+       L 570 590
+       C 650 622 700 675 695 742
+       C 688 828 600 868 510 861
+       C 425 854 352 812 325 748"
+    fill="none"
+    stroke="url(#mark)"
+    stroke-width="112"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>

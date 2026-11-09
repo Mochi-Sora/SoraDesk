@@ -1,0 +1,28 @@
+{
+  "name": "soradesk",
+  "private": true,
+  "version": "0.1.0",
+  "author": "Mochi-Sora",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "mock": "node dev/mock-gateway.mjs",
+    "smoke": "node dev/smoke.mjs",
+    "check-versions": "node dev/check-versions.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-process": "^2.4.0",
+    "@tauri-apps/plugin-updater": "^2.14.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16",
+    "ws": "^8.18.1"
+  }
+}

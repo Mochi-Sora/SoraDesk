@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sora-desktop"
+version = "0.1.0"
+description = "Local desktop bridge between SoraDesk and SoraAgent"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "AGPL-3.0-or-later" }
+dependencies = [
+  # SoraAgent is expected to be installed in the same environment (the bridge
+  # imports sora_agent directly); it is not published on PyPI.
+  "websockets>=15,<17",
+]
+
+[project.scripts]
+sora-desktop = "sora_desktop.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["sora_desktop*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
