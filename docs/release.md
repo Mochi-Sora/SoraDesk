@@ -4,6 +4,15 @@ SoraDesk ships as a Tauri v2 desktop bundle. Tagged builds are produced by
 [`.github/workflows/release.yml`](../.github/workflows/release.yml); the in-app
 **Settings → Updates** button reads the updater manifest from GitHub Releases.
 
+## Release status
+
+v0.1.0 is published. The updater key is configured as
+`TAURI_SIGNING_PRIVATE_KEY`, so every release produces signed updater artifacts.
+Apple notarization and Windows Authenticode secrets are not configured yet; the
+v0.1.0 macOS and Windows installers are unsigned. Gatekeeper and SmartScreen will
+warn on first launch. A signed follow-up release will be cut once the certificates
+are available.
+
 ## Updater key
 
 The public key is committed in
@@ -70,8 +79,8 @@ openssl base64 -A -in DeveloperID.p12 -out apple-certificate-base64.txt
 `APPLE_PASSWORD` is an app-specific password, not your Apple ID password. Creating
 the certificate requires a Mac and a paid Apple Developer account; the CI build runs
 on GitHub's macOS runner. Without these secrets the macOS job still produces an
-ad-hoc-signed draft build, but Gatekeeper will warn on other machines and the
-release is not notarized.
+ad-hoc-signed build, but Gatekeeper will warn on other machines and the release is
+not notarized. This is the state of the v0.1.0 macOS build.
 
 The webview records voice notes, so `src-tauri/Info.plist` carries the microphone
 usage string and `src-tauri/Entitlements.plist` grants the hardened-runtime audio
@@ -88,7 +97,8 @@ URL in the workflow if your certificate authority provides a different timestamp
 server.
 
 Without these secrets the Windows job still builds and uploads installers, but they
-are unsigned and SmartScreen will warn until the certificate builds reputation.
+are unsigned and SmartScreen will warn until the certificate builds reputation. This
+is the state of the v0.1.0 Windows installer.
 
 Encode the `.pfx` as a single line before adding it as a secret:
 
@@ -149,7 +159,8 @@ Set the release secrets (repository → Settings → Secrets and variables → A
 
 3. The workflow creates a **draft** GitHub release with the bundles, updater
    signatures, and `latest.json`.
-4. Download and smoke-test the draft assets, then publish the release.
+4. Download and smoke-test the draft assets, confirm `latest.json` contains every
+   platform, then publish the release.
 5. The updater endpoint
    (`https://github.com/Mochi-Sora/SoraDesk/releases/latest/download/latest.json`)
    only serves published releases, so existing clients see the update after step 4.

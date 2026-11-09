@@ -128,6 +128,14 @@ jobs:
 
             **Requirements:** a local SoraAgent installation and the `sora-desktop` bridge. See the README for setup.
 
+            ### Install
+
+            - **macOS:** download the `.dmg`, open it, and drag SoraDesk to Applications. If macOS warns that the developer cannot be verified, open **System Settings → Privacy & Security** and choose **Open Anyway**.
+            - **Windows:** download the `-setup.exe` and run it. If SmartScreen appears, choose **More info → Run anyway**.
+            - **Linux:** use the `.AppImage`, `.deb`, or `.rpm`.
+
+            **Signing:** updater artifacts are signed. Installer code signing and notarization are applied when the corresponding repository secrets are configured.
+
             Licensed AGPL-3.0-only.
           releaseDraft: true
           prerelease: false
