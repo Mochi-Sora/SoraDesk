@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Desktop client for the SoraAgent runtime"
 authors = ["Mochi-Sora <Mochi-Sora@users.noreply.github.com>"]
 edition = "2024"
-license = "AGPL-3.0-or-later"
+license = "AGPL-3.0-only"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

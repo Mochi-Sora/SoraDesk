@@ -472,7 +472,7 @@ export const settingsView: ViewModule = {
       );
       aboutList.append(
         el("dt", undefined, "Licence"),
-        el("dd", undefined, "AGPL-3.0-or-later (see LICENSE)"),
+        el("dd", undefined, "AGPL-3.0-only (see LICENSE)"),
       );
       aboutSection.append(aboutList);
       scroll.append(aboutSection);

@@ -204,7 +204,7 @@ notarizes macOS when the Apple secrets are present, and uploads `latest.json`. S
 
 ## Licence
 
-**AGPL-3.0-or-later** — full text in [`LICENSE`](LICENSE); the copyright holder and the
+**AGPL-3.0-only** — full text in [`LICENSE`](LICENSE); the copyright holder and the
 standard application notice are in [`NOTICE`](NOTICE). © 2026 Tam Kuan Hou
 (譚君浩 / Marco Tam), GitHub: [Mochi-Sora](https://github.com/Mochi-Sora). SoraDesk is a
 separate work licensed the same way as the

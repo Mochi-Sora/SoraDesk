@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "author": "Mochi-Sora",
-  "license": "AGPL-3.0-or-later",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "vite",
