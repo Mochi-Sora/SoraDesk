@@ -98,6 +98,8 @@ Set the release secrets (repository → Settings → Secrets and variables → A
 | `APPLE_CERTIFICATE_PASSWORD` | Password for the `.p12` |
 | `APPLE_SIGNING_IDENTITY` | e.g. `Developer ID Application: …` |
 | `APPLE_ID` / `APPLE_PASSWORD` / `APPLE_TEAM_ID` | Notarization credentials |
+| `WINDOWS_CERTIFICATE` | Base64 `.pfx` Authenticode certificate (optional) |
+| `WINDOWS_CERTIFICATE_PASSWORD` | Password for the `.pfx` (optional) |
 
 `GITHUB_TOKEN` is provided by Actions.
 
