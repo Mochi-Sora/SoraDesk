@@ -9,6 +9,8 @@ permissions:
 
 jobs:
   publish:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -20,7 +22,7 @@ jobs:
             args: ""
             rust_targets: ""
           - platform: windows-latest
-            args: ""
+            args: "--bundles nsis"
             rust_targets: ""
     runs-on: ${{ matrix.platform }}
     steps:
@@ -87,17 +89,32 @@ jobs:
 
           Write-Host "Imported Windows signing certificate $($cert.Thumbprint)."
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: Configure Apple signing
+        if: matrix.platform == 'macos-latest'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -z "$APPLE_CERTIFICATE" ]; then
+            echo "Apple signing secrets are not set; macOS build will be ad-hoc signed."
+            exit 0
+          fi
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            value="${!name}"
+            if [ -n "$value" ]; then
+              echo "$name=$value" >> "$GITHUB_ENV"
+            fi
+          done
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "SoraDesk ${{ github.ref_name }}"
@@ -114,5 +131,6 @@ jobs:
             Licensed AGPL-3.0-only.
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: true
+          uploadUpdaterJson: true
+          updaterJsonPreferNsis: true
           args: ${{ matrix.args }} --config src-tauri/tauri.release.conf.json
