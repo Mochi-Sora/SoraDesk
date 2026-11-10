@@ -64,6 +64,8 @@ export interface AppState {
   sessions: SessionMeta[];
   activeSessionId: string | null;
   chatBusy: boolean;
+  /** A turn is running but no visible assistant output has arrived yet. */
+  chatWaiting: boolean;
   messages: ChatMessage[];
   queued: QueuedSummary[];
   approvals: ApprovalCard[];

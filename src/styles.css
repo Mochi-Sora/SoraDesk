@@ -336,6 +336,21 @@ body {
   padding: 4px 6px 4px 2px;
 }
 
+.chat-waiting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.waiting-dots {
+  color: var(--accent);
+  letter-spacing: 2px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
 .msg {
   display: flex;
   flex-direction: column;

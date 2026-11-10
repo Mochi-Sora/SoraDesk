@@ -109,6 +109,11 @@ export const chatView: ViewModule = {
     const pairingBanner = el("div", "banner pairing hidden");
     const emptyState = el("div", "empty-state");
     const messagesEl = el("div", "messages");
+    const waitingEl = el("div", "chat-waiting hidden");
+    waitingEl.append(
+      el("span", "waiting-dots", "•••"),
+      el("span", undefined, "Sora is thinking…"),
+    );
     const approvalsEl = el("div", "approvals");
 
     const composer = el("form", "composer");
@@ -129,7 +134,7 @@ export const chatView: ViewModule = {
     composerRow.append(attachBtn, fileInput, recordBtn, input, queueBtn, sendBtn);
     composer.append(pendingStrip, composerRow);
 
-    view.append(head, pairingBanner, emptyState, messagesEl, approvalsEl, composer);
+    view.append(head, pairingBanner, emptyState, messagesEl, waitingEl, approvalsEl, composer);
     root.append(view);
 
     const rendered = new Map<string, RenderedMessage>();
@@ -620,6 +625,7 @@ export const chatView: ViewModule = {
         rendered.clear();
         renderedSession = state.activeSessionId;
       }
+      waitingEl.classList.toggle("hidden", !state.chatWaiting);
       const distance = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight;
       nearBottom = distance < 80;
       syncMessages(state.messages);

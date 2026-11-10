@@ -84,7 +84,12 @@ export class ChatController {
     this.activeTurns.clear();
     this.openBoxes.clear();
     releasePreviews();
-    this.store.set({ activeSessionId: sessionId, messages: [], chatBusy: false });
+    this.store.set({
+      activeSessionId: sessionId,
+      messages: [],
+      chatBusy: false,
+      chatWaiting: false,
+    });
   }
 
   async openSession(sessionId: string | null): Promise<void> {
@@ -103,6 +108,7 @@ export class ChatController {
       activeSessionId: sessionId,
       messages: [...this.messages],
       chatBusy: false,
+      chatWaiting: false,
     });
     void this.hydrateAttachments(sessionId, this.messages);
   }
@@ -531,9 +537,21 @@ export class ChatController {
 
   private publish(): void {
     const activeSessionId = this.store.get().activeSessionId;
+    const activeTurnId =
+      activeSessionId === null ? undefined : this.activeTurns.get(activeSessionId);
+    const waiting =
+      activeSessionId !== null &&
+      activeTurnId !== undefined &&
+      !this.messages.some(
+        (message) =>
+          message.sessionId === activeSessionId &&
+          message.turnId === activeTurnId &&
+          message.role === "assistant",
+      );
     this.store.set({
       messages: [...this.messages],
-      chatBusy: activeSessionId !== null && this.activeTurns.has(activeSessionId),
+      chatBusy: activeTurnId !== undefined,
+      chatWaiting: waiting,
       queued: this.queue.map(({ id, sessionId, text }) => ({ id, sessionId, text })),
     });
   }

@@ -42,6 +42,7 @@ const initialState: AppState = {
   sessions: [],
   activeSessionId: null,
   chatBusy: false,
+  chatWaiting: false,
   messages: [],
   queued: [],
   approvals: [],
