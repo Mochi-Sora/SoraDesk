@@ -5,9 +5,10 @@ Tauri client using the protocol in [`../docs/protocol.md`](../docs/protocol.md).
 
 The bridge is a thin adapter, not a second agent: it builds SoraAgent's own
 provider, tools, memory, identity, calendar, sessions, and `ChatHandler`, then
-translates each handler reply into the protocol's complete assistant message.
-The current SoraAgent runtime does not stream token deltas; the protocol still
-supports `delta` events for clients and future runtimes.
+translates the handler's cumulative stream snapshots into protocol `delta`
+events and one authoritative `message` per segment. Streaming is enabled by
+default; when it is disabled or the provider cannot stream, the bridge sends a
+single complete `message` event instead.
 
 ## Install
 
@@ -58,7 +59,7 @@ sora-desktop pairing revoke <token-prefix>
 
 | Path | Purpose |
 |---|---|
-| `~/.sora_agent/desktop/config.json` | bridge host, port, limits, progress |
+| `~/.sora_agent/desktop/config.json` | bridge host, port, limits, streaming, progress |
 | `~/.sora_agent/desktop/pairing.json` | paired devices and live pairing codes |
 | `~/.sora_agent/desktop/media/` | uploaded files and the session attachment index |
 | `~/.sora_agent/desktop/desktop.log` | daemon log |
@@ -69,6 +70,9 @@ sora-desktop pairing revoke <token-prefix>
 
 - `hello.result.features` is empty: SoraAgent has no mid-turn injection, so the
   client queues text while a turn runs.
+- Streaming follows both `streaming` in the bridge config and SoraAgent's
+  `features.streaming` / `SORA_STREAMING` setting. Deltas are coalesced by the
+  handler; the bridge diffs cumulative snapshots before emitting them.
 - `calendar.list` is read-only and backed by SoraAgent's local calendar.
 - `memory.stats` reports SoraAgent's `memory.doctor()` shape plus database and
   daily-store byte sizes.

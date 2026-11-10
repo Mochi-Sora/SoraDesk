@@ -310,9 +310,17 @@ async def _client_session(url: str) -> None:
         check("user echo text", user["event"]["text"] == "hello from smoke")
         first = await client.collect_turn(turn_id)
         check("turn completed", first["end"]["status"] == "completed", str(first["end"]))
+        check("streaming produced deltas", bool(first["deltas"]), str(first["deltas"]))
         check("assistant text non-empty", bool(first["text"].strip()))
         assistant = [item for item in first["messages"] if item["role"] == "assistant"]
         check("final assistant message", bool(assistant) and bool(assistant[-1]["text"].strip()))
+        check(
+            "final message closes the streamed answer",
+            "".join(first["deltas"]).strip().endswith(
+                assistant[-1]["text"].strip()
+            ),
+            f"{assistant[-1]['text']!r} not in {''.join(first['deltas'])!r}",
+        )
         check("tool progress observed", bool(first["tools"]))
         updated = await client.wait_event("session.updated", session_id=session_id)
         check("session updated title", updated["event"]["title"] == "hello from smoke")

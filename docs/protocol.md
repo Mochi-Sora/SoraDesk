@@ -305,9 +305,10 @@ client. `events.unsubscribe` stops the fan-out, and disconnecting does so implic
 
 Events mirror SoraAgent's channel outbound hooks and tool/progress callbacks. The bridge
 runs the same `ChatHandler` as SoraAgent's channels and translates each turn into the
-events below. The current SoraAgent runtime returns one complete reply per turn, so the
-bridge sends a single authoritative `message` event and no `delta` frames; the delta
-events remain part of the protocol for clients and future streaming runtimes.
+events below. When streaming is enabled, the bridge diffs the handler's cumulative
+snapshots into `delta` events and then sends one authoritative `message` per segment.
+When streaming is disabled or the provider cannot stream, the turn produces a single
+complete `message` event and no `delta` frames.
 
 | `type` | payload | notes |
 |---|---|---|
@@ -463,9 +464,12 @@ WebSocket close codes: **4400** protocol error · **4401** unauthorized/revoked 
   read-only observer channel for SoraAvatar. Existing requests and events are unchanged;
   `"v"` stays `1`.
 - **Bridge adaptation (2026-11-10):** the bridge now runs against the current SoraAgent
-  `ChatHandler` API and sends one complete assistant `message` per turn instead of token
-  deltas. The protocol already permits non-streaming turns, so existing clients and `"v"`
-  are unchanged.
+  `ChatHandler` API. The protocol already permits non-streaming turns, so existing clients
+  and `"v"` are unchanged.
+- **Streaming restoration (2026-11-10):** SoraAgent's provider, runner, and `ChatHandler`
+  streaming APIs are restored, and the bridge emits `delta` events again when the bridge
+  config and SoraAgent feature settings both allow it. Non-streaming turns remain valid and
+  produce one complete `message`. `"v"` stays `1`.
 
 ## 10. Implementation status (informative)
 
@@ -475,5 +479,5 @@ WebSocket close codes: **4400** protocol error · **4401** unauthorized/revoked 
 - **Server:** [`bridge/sora_desktop/`](../bridge/sora_desktop/) implements v1 through v1.3
   plus read-only `calendar.list` and the SoraAgent `memory.stats` shape. It runs SoraAgent's
   own `ChatHandler`, so approvals, history, and tools come from the same runtime the CLI
-  uses. The current runtime returns one complete reply per turn, so the bridge emits a
-  single `message` event and no `delta` frames; `chat.inject` is intentionally unsupported.
+  uses. The bridge emits `delta` frames when streaming is enabled and one complete
+  `message` per segment otherwise; `chat.inject` is intentionally unsupported.

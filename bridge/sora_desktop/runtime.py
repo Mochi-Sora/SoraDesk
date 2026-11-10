@@ -3,10 +3,9 @@
 The bridge deliberately does not reimplement the agent.  It builds the same
 provider, tool registry, memory, identity, calendar, session store, and chat
 handler that SoraAgent's own channels use, then translates the chat handler's
-reply into the SoraDesk protocol's complete assistant message.  The current
-SoraAgent runtime does not stream token deltas, so a turn delivers one
-authoritative ``message`` event; clients that support streaming still work
-unchanged.
+stream snapshots into the SoraDesk protocol's incremental events.  When
+streaming is disabled (or a provider cannot stream), the handler returns one
+complete reply and the bridge emits a single authoritative ``message`` event.
 """
 
 from __future__ import annotations
@@ -26,7 +25,13 @@ from sora_agent.calendar import CalendarItem
 from sora_agent.channels.chat import CHAT_SYSTEM_PROMPT, ChatHandler
 from sora_agent.channels.sessions import SessionStore
 from sora_agent.channels.sessions import default_root as default_sessions_root
-from sora_agent.channels.types import InboundMessage
+from sora_agent.channels.types import (
+    STREAM_DELTA_KIND,
+    STREAM_END_KIND,
+    InboundMessage,
+    OutboundMessage,
+    TurnReply,
+)
 from sora_agent.files import Attachment
 from sora_agent.persona import apply_persona
 from sora_agent.runner import RunEvent
@@ -42,6 +47,7 @@ from sora_agent.runtime_setup import (
     context_window,
     load_runtime,
     quality_enabled,
+    streaming_enabled,
 )
 
 from .config import DesktopConfig
@@ -63,6 +69,7 @@ class TurnContext:
     session_id: str
     turn_id: str
     emit: Emit
+    stream: "TurnStream"
     tool_seq: int = 0
 
 
@@ -179,6 +186,116 @@ class PendingApproval:
     decision: bool | None = None
 
 
+@dataclass
+class _StreamEntry:
+    message_id: str
+    text: str = ""
+    done: bool = False
+
+
+class TurnStream:
+    """Diff cumulative chat snapshots into protocol ``delta`` / ``message`` frames."""
+
+    def __init__(self, session_id: str, turn_id: str, emit: Emit) -> None:
+        self.session_id = session_id
+        self.turn_id = turn_id
+        self.emit = emit
+        self._entries: dict[str, _StreamEntry] = {}
+        self._counter = 0
+        self._emitted = 0
+
+    def on_outbound(self, outbound: OutboundMessage) -> None:
+        metadata = outbound.metadata if isinstance(outbound.metadata, dict) else {}
+        kind = metadata.get("kind")
+        stream_id = str(metadata.get("stream_id") or "default")
+        if kind == STREAM_DELTA_KIND:
+            self._delta(stream_id, outbound.content)
+        elif kind == STREAM_END_KIND:
+            self._finish_entry(stream_id)
+
+    def _delta(self, stream_id: str, snapshot: str) -> None:
+        entry = self._entries.get(stream_id)
+        if entry is None or entry.done:
+            entry = _StreamEntry(message_id=self._next_id())
+            self._entries[stream_id] = entry
+        if snapshot == entry.text:
+            return
+        if snapshot.startswith(entry.text):
+            delta = snapshot[len(entry.text) :]
+        else:
+            # The handler replaced the snapshot (provider recovery).  Ask the
+            # client to clear the box, then stream the new text into it.
+            self.emit(
+                "message",
+                {
+                    "session_id": self.session_id,
+                    "turn_id": self.turn_id,
+                    "message_id": entry.message_id,
+                    "role": "assistant",
+                    "text": "",
+                    "ts": _now_ms(),
+                    "replaced": True,
+                },
+            )
+            delta = snapshot
+            entry.text = ""
+        entry.text = snapshot
+        if delta:
+            self.emit(
+                "delta",
+                {
+                    "session_id": self.session_id,
+                    "turn_id": self.turn_id,
+                    "message_id": entry.message_id,
+                    "text_delta": delta,
+                },
+            )
+
+    def _finish_entry(self, stream_id: str) -> None:
+        entry = self._entries.get(stream_id)
+        if entry is None or entry.done:
+            return
+        self._emit_final(entry)
+        entry.done = True
+
+    def finish(self, final_text: str) -> None:
+        for stream_id in list(self._entries):
+            self._finish_entry(stream_id)
+        text = final_text.strip()
+        if text and not any(
+            entry.text.strip() == text for entry in self._entries.values()
+        ):
+            entry = _StreamEntry(message_id=self._next_id(), text=final_text)
+            self._entries[f"final:{self._counter}"] = entry
+            self._emit_final(entry, done=True)
+
+    def _emit_final(self, entry: _StreamEntry, *, done: bool = False) -> None:
+        text = entry.text
+        if not text.strip():
+            return
+        entry.done = done or entry.done
+        self._emitted += 1
+        self.emit(
+            "message",
+            {
+                "session_id": self.session_id,
+                "turn_id": self.turn_id,
+                "message_id": entry.message_id,
+                "role": "assistant",
+                "text": text,
+                "ts": _now_ms(),
+            },
+        )
+
+    def _next_id(self) -> str:
+        self._counter += 1
+        return f"{self.turn_id}-m{self._counter}"
+
+    @property
+    def emitted(self) -> int:
+        return self._emitted
+
+
 class DesktopRuntime:
     """The assembled SoraAgent runtime used by the bridge server."""
 
@@ -231,6 +348,7 @@ class DesktopRuntime:
                 timeout=self.settings.limits.approval_timeout
             )
         self.approval_mode = mode
+        self.streaming = bool(config.streaming and streaming_enabled(self.settings))
 
         prompt = apply_persona(
             CHAT_SYSTEM_PROMPT,
@@ -246,15 +364,18 @@ class DesktopRuntime:
             approval_gate=self.approvals,
             sessions=self.sessions,
             quality=None if quality_enabled(self.settings) else False,
+            emitter=self._on_outbound if self.streaming else None,
             max_steps=self.settings.limits.max_steps,
             max_turns=self.settings.limits.max_turns,
             max_tool_result_chars=self.settings.limits.max_tool_result_chars,
             tool_timeout=self.settings.limits.tool_timeout,
             provider_retries=self.settings.limits.provider_retries,
             on_event=self._on_run_event,
+            max_stream_chars=self.settings.limits.max_stream_chars,
             system_prompt=prompt,
             calendar=None if self.calendar is False else self.calendar,
             context_window=context_window(self.settings),
+            streaming=self.streaming,
             file_understander=self.files,
         )
         self._cancelled: set[str] = set()
@@ -290,10 +411,12 @@ class DesktopRuntime:
         attachments: list[Attachment],
         emit: Emit,
     ) -> TurnOutcome:
+        stream = TurnStream(session_id, turn_id, emit)
         context = TurnContext(
             session_id=session_id,
             turn_id=turn_id,
             emit=emit,
+            stream=stream,
         )
         _TURN.context = context
         try:
@@ -305,22 +428,8 @@ class DesktopRuntime:
                 attachments=attachments,
             )
             result = self.handler.handle(inbound)
-            # Current SoraAgent returns plain text; older builds may return a
-            # TurnReply-like object with a text field.  Accept both while the
-            # streaming API is being refactored.
-            final_text = str(getattr(result, "text", result)).strip()
-            if final_text:
-                emit(
-                    "message",
-                    {
-                        "session_id": session_id,
-                        "turn_id": turn_id,
-                        "message_id": f"{turn_id}-m1",
-                        "role": "assistant",
-                        "text": final_text,
-                        "ts": _now_ms(),
-                    },
-                )
+            final_text = result.text if isinstance(result, TurnReply) else str(result)
+            stream.finish(final_text)
             with self._lock:
                 interrupted = session_id in self._cancelled
                 self._cancelled.discard(session_id)
@@ -360,6 +469,11 @@ class DesktopRuntime:
                 log.exception("closing memory failed")
 
     # -- chat handler callbacks ------------------------------------------------
+
+    def _on_outbound(self, outbound: OutboundMessage) -> None:
+        context = _context()
+        if context is not None:
+            context.stream.on_outbound(outbound)
 
     def _on_run_event(self, event: RunEvent) -> None:
         context = _context()
