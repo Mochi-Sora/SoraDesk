@@ -40,7 +40,6 @@ class DesktopConfig:
     trust_localhost: bool = True
     max_upload_mb: int = DEFAULT_MAX_UPLOAD_MB
     max_fetch_mb: int = DEFAULT_MAX_FETCH_MB
-    streaming: bool = True
     send_progress: bool = True
 
     @classmethod
@@ -54,7 +53,6 @@ class DesktopConfig:
             trust_localhost=_as_bool(raw.get("trust_localhost"), base.trust_localhost),
             max_upload_mb=_as_int(raw.get("max_upload_mb"), base.max_upload_mb, 0, 4096),
             max_fetch_mb=_as_int(raw.get("max_fetch_mb"), base.max_fetch_mb, 0, 4096),
-            streaming=_as_bool(raw.get("streaming"), base.streaming),
             send_progress=_as_bool(raw.get("send_progress"), base.send_progress),
         )
 
@@ -65,7 +63,6 @@ class DesktopConfig:
             trust_localhost=self.trust_localhost,
             max_upload_mb=self.max_upload_mb,
             max_fetch_mb=self.max_fetch_mb,
-            streaming=self.streaming,
             send_progress=self.send_progress,
         )
 

@@ -5,7 +5,9 @@ Tauri client using the protocol in [`../docs/protocol.md`](../docs/protocol.md).
 
 The bridge is a thin adapter, not a second agent: it builds SoraAgent's own
 provider, tools, memory, identity, calendar, sessions, and `ChatHandler`, then
-translates the handler's cumulative stream snapshots into protocol deltas.
+translates each handler reply into the protocol's complete assistant message.
+The current SoraAgent runtime does not stream token deltas; the protocol still
+supports `delta` events for clients and future runtimes.
 
 ## Install
 
@@ -56,7 +58,7 @@ sora-desktop pairing revoke <token-prefix>
 
 | Path | Purpose |
 |---|---|
-| `~/.sora_agent/desktop/config.json` | bridge host, port, limits, streaming |
+| `~/.sora_agent/desktop/config.json` | bridge host, port, limits, progress |
 | `~/.sora_agent/desktop/pairing.json` | paired devices and live pairing codes |
 | `~/.sora_agent/desktop/media/` | uploaded files and the session attachment index |
 | `~/.sora_agent/desktop/desktop.log` | daemon log |

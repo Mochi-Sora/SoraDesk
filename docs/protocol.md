@@ -303,10 +303,11 @@ client. `events.unsubscribe` stops the fan-out, and disconnecting does so implic
 
 ## 4. Events (server → client)
 
-Events mirror SoraAgent's channel outbound hooks (`send`, `send_delta`,
-`send_reasoning_delta`, `send_reasoning_end`, `send_file_edit_events`, tool/progress
-callbacks, approvals). The bridge translates `ChatHandler`'s cumulative stream snapshots
-into the incremental `delta` frames below.
+Events mirror SoraAgent's channel outbound hooks and tool/progress callbacks. The bridge
+runs the same `ChatHandler` as SoraAgent's channels and translates each turn into the
+events below. The current SoraAgent runtime returns one complete reply per turn, so the
+bridge sends a single authoritative `message` event and no `delta` frames; the delta
+events remain part of the protocol for clients and future streaming runtimes.
 
 | `type` | payload | notes |
 |---|---|---|
@@ -461,6 +462,10 @@ WebSocket close codes: **4400** protocol error · **4401** unauthorized/revoked 
 - **v1.5 (additive, 2026-11-10):** `events.subscribe` / `events.unsubscribe`, a loopback-only
   read-only observer channel for SoraAvatar. Existing requests and events are unchanged;
   `"v"` stays `1`.
+- **Bridge adaptation (2026-11-10):** the bridge now runs against the current SoraAgent
+  `ChatHandler` API and sends one complete assistant `message` per turn instead of token
+  deltas. The protocol already permits non-streaming turns, so existing clients and `"v"`
+  are unchanged.
 
 ## 10. Implementation status (informative)
 
@@ -469,5 +474,6 @@ WebSocket close codes: **4400** protocol error · **4401** unauthorized/revoked 
   server used by the Node smoke suite.
 - **Server:** [`bridge/sora_desktop/`](../bridge/sora_desktop/) implements v1 through v1.3
   plus read-only `calendar.list` and the SoraAgent `memory.stats` shape. It runs SoraAgent's
-  own `ChatHandler`, so approvals, history, tools, and streaming come from the same runtime
-  the CLI uses. `chat.inject` is intentionally unsupported.
+  own `ChatHandler`, so approvals, history, and tools come from the same runtime the CLI
+  uses. The current runtime returns one complete reply per turn, so the bridge emits a
+  single `message` event and no `delta` frames; `chat.inject` is intentionally unsupported.

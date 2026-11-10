@@ -352,7 +352,6 @@ def _config(args: argparse.Namespace) -> int:
         "trust_localhost": config.trust_localhost,
         "max_upload_mb": config.max_upload_mb,
         "max_fetch_mb": config.max_fetch_mb,
-        "streaming": config.streaming,
         "send_progress": config.send_progress,
         "config_path": str(CONFIG_PATH),
         "pairing_path": str(PAIRING_PATH),

@@ -119,12 +119,17 @@ class Client:
                 end = frame["event"]
             elif frame.get("type"):
                 self.events.append(frame)
+        final_text = "".join(
+            item.get("text", "")
+            for item in messages
+            if item.get("role") == "assistant"
+        )
         return {
             "deltas": deltas,
             "messages": messages,
             "tools": tools,
             "end": end,
-            "text": "".join(deltas),
+            "text": "".join(deltas) or final_text,
         }
 
 
@@ -181,7 +186,7 @@ async def _observer_session(url: str) -> None:
         check("observer sees user echo", echo["event"]["text"] == "observer fanout")
         observed = await observer.collect_turn(turn_id)
         check("observer sees turn end", observed["end"]["status"] == "completed")
-        check("observer sees streamed text", bool(observed["text"].strip()))
+        check("observer sees assistant text", bool(observed["text"].strip()))
 
         source_result = await source.collect_turn(turn_id)
         check("originating client still sees turn end", source_result["end"]["status"] == "completed")
@@ -305,8 +310,7 @@ async def _client_session(url: str) -> None:
         check("user echo text", user["event"]["text"] == "hello from smoke")
         first = await client.collect_turn(turn_id)
         check("turn completed", first["end"]["status"] == "completed", str(first["end"]))
-        check("streamed deltas", bool(first["deltas"]))
-        check("streamed text non-empty", bool(first["text"].strip()))
+        check("assistant text non-empty", bool(first["text"].strip()))
         assistant = [item for item in first["messages"] if item["role"] == "assistant"]
         check("final assistant message", bool(assistant) and bool(assistant[-1]["text"].strip()))
         check("tool progress observed", bool(first["tools"]))

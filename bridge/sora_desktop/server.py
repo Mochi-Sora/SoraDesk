@@ -214,11 +214,10 @@ class Bridge:
         self._install_signal_handlers()
         self._watch_task = asyncio.create_task(self._watch_pairings())
         log.info(
-            "SoraDesk bridge listening on ws://%s:%s (approval=%s, streaming=%s)",
+            "SoraDesk bridge listening on ws://%s:%s (approval=%s)",
             self.config.host,
             self.port,
             self.runtime.approval_mode,
-            self.runtime.streaming,
         )
         try:
             await self._stop.wait()
