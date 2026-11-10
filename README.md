@@ -6,7 +6,7 @@ A desktop client for the [SoraAgent](https://github.com/Mochi-Sora/SoraAgent) ag
 runtime — chat, sessions, calendar, memories, and settings over **local**, **SSH**, or
 **direct IP** connections, built with Tauri v2 (Rust shell + vanilla TypeScript UI).
 
-> **Status:** v0.1.0 is published. The client, the local `sora_desktop` bridge, and
+> **Status:** Live — v0.1.0 is published. The client, the local `sora_desktop` bridge, and
 > Phase 5 packaging are implemented against the frozen v1 protocol. The bridge lives in
 > [`bridge/sora_desktop/`](bridge/sora_desktop/) and imports SoraAgent directly;
 > `dev/mock-gateway.mjs` remains the reference server. Updater artifacts are signed;
@@ -211,6 +211,16 @@ packages are signed. See [`docs/release.md`](docs/release.md).
   [`docs/release.md`](docs/release.md).
 - A signed follow-up release is planned once the Apple and Windows certificates are
   available.
+
+## SoraPlatform
+
+SoraDesk is part of [SoraPlatform](https://github.com/Mochi-Sora), an umbrella of
+open-source, independent products built against telemetry and bloat. The platform also
+includes [SoraAgent](https://github.com/Mochi-Sora/SoraAgent), the runtime this client
+talks to; [SoraSkills](https://www.agensi.io/creators/mochi-sora), framework-agnostic
+agent skills published on Agensi; and the rest of the ten-product roadmap. The official
+site lives at
+[SoraOfficialWebsite](https://github.com/Mochi-Sora/SoraOfficialWebsite).
 
 ## Licence
 
