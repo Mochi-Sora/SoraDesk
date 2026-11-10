@@ -143,11 +143,63 @@ async def run() -> None:
     print(f"bridge: {url}")
     try:
         await asyncio.wait_for(_client_session(url), timeout=120)
+        await asyncio.wait_for(_observer_session(url), timeout=120)
         await asyncio.wait_for(_pairing_session(), timeout=60)
     finally:
         bridge.stop()
         await asyncio.wait_for(task, timeout=30)
     check("run state removed on shutdown", not STATE_PATH.exists())
+
+
+async def _observer_session(url: str) -> None:
+    """A second loopback client observes turns without owning them."""
+    async with connect(url, max_size=32 * 1024 * 1024) as source_ws, connect(
+        url, max_size=32 * 1024 * 1024
+    ) as observer_ws:
+        source = Client(source_ws)
+        observer = Client(observer_ws)
+
+        source_hello = await source.request(
+            "hello", device_token=None, client={"name": "observer-source"}
+        )
+        check("observer source paired", source_hello["paired"] is True)
+        observer_hello = await observer.request(
+            "hello",
+            device_token=None,
+            client={"name": "observer", "version": "0.0.1", "platform": "test"},
+        )
+        check("observer loopback is paired", observer_hello["paired"] is True)
+
+        subscribed = await observer.request("events.subscribe")
+        check("observer subscribed", subscribed["subscribed"] is True)
+        again = await observer.request("events.subscribe")
+        check("observer subscribe is idempotent", again["subscribed"] is True)
+
+        sent = await source.request("chat.send", session_id=None, text="observer fanout")
+        turn_id = sent["turn_id"]
+        echo = await observer.wait_event("message", turn_id=turn_id, role="user")
+        check("observer sees user echo", echo["event"]["text"] == "observer fanout")
+        observed = await observer.collect_turn(turn_id)
+        check("observer sees turn end", observed["end"]["status"] == "completed")
+        check("observer sees streamed text", bool(observed["text"].strip()))
+
+        source_result = await source.collect_turn(turn_id)
+        check("originating client still sees turn end", source_result["end"]["status"] == "completed")
+
+        unsubscribed = await observer.request("events.unsubscribe")
+        check("observer unsubscribed", unsubscribed["subscribed"] is False)
+
+        quiet = await source.request(
+            "chat.send", session_id=None, text="quiet after unsubscribe"
+        )
+        quiet_turn = quiet["turn_id"]
+        await source.collect_turn(quiet_turn)
+        try:
+            await observer.wait_event("turn.end", turn_id=quiet_turn, timeout=1.0)
+        except (AssertionError, TimeoutError):
+            check("observer stops receiving after unsubscribe", True)
+        else:
+            raise AssertionError("observer received an event after unsubscribe")
 
 
 async def _pairing_session() -> None:
@@ -184,6 +236,16 @@ async def _pairing_session() -> None:
             check("paired after approval", hello["paired"] is True)
             listed = await client.request("sessions.list")
             check("paired request works", isinstance(listed["sessions"], list))
+            try:
+                await client.request("events.subscribe")
+            except AssertionError as exc:
+                check(
+                    "pairing-only client cannot observe turn events",
+                    "unauthorized" in str(exc),
+                    str(exc),
+                )
+            else:
+                raise AssertionError("untrusted observer subscription should fail")
 
             check("revoked token", ledger.revoke(token) == token)
             deadline = time.monotonic() + 5
@@ -251,6 +313,7 @@ async def _client_session(url: str) -> None:
         updated = await client.wait_event("session.updated", session_id=session_id)
         check("session updated title", updated["event"]["title"] == "hello from smoke")
         check("session updated count", updated["event"]["message_count"] == 2)
+
 
         print("history and list")
         history = await client.request("sessions.history", session_id=session_id)

@@ -104,6 +104,8 @@ ISO-8601 strings, and `memory.stats` carries the bytes/counts from `memory.docto
 | `calendar.list` | `limit?: number` (default 200, capped at 500) | `{items: [CalendarItem], enabled, error?}` |
 | `approve` | `approval_id` | `{approval_id, approved: true}` |
 | `deny` | `approval_id`, `reason?: string` | `{approval_id, approved: false}` |
+| `events.subscribe` | — | `{subscribed: true}` (local observer extension, §3.5) |
+| `events.unsubscribe` | — | `{subscribed: false}` |
 | `ping` | `ts` (client epoch ms) | `{ts, server_time}` |
 
 Rules:
@@ -282,6 +284,23 @@ Rules:
   completed ones). The client currently exposes no date-range filter.
 - `kind` is `event` or `todo`; `importance` is `important`, `balanced`, or `not important`.
 
+### 3.5 Local event observation (`events.subscribe`)
+
+SoraAvatar uses a read-only extension to mirror agent activity without owning a chat
+session. A trusted loopback client may call `events.subscribe`; from then on the bridge
+fans out every turn event (`message`, `delta`, `reasoning_delta`, `reasoning_end`, `tool`,
+`file_edit`, `progress`, `approval`, `turn.end`) to it as well as to the originating
+client. `events.unsubscribe` stops the fan-out, and disconnecting does so implicitly.
+
+- The extension is **local-only**: clients that are not trusted loopback connections get
+  `unauthorized`. It does not expose events to paired remote devices.
+- The observer receives events for every session, not just its own. It must treat unknown
+  event types as ignorable, exactly like a normal client.
+- Subscription does not grant permission to answer approvals or interrupt turns; the
+  originating client remains the owner of the turn. The observer is an audience.
+- SoraDesk clients ignore this extension; it is additive and does not change existing
+  event meaning.
+
 ## 4. Events (server → client)
 
 Events mirror SoraAgent's channel outbound hooks (`send`, `send_delta`,
@@ -439,6 +458,9 @@ WebSocket close codes: **4400** protocol error · **4401** unauthorized/revoked 
   advertises `features: []` (no steering), replaces `cron.list` with read-only
   `calendar.list`, and reports the SoraAgent memory doctor shape. No envelope or event meaning
   changed, so `"v"` stays `1`.
+- **v1.5 (additive, 2026-11-10):** `events.subscribe` / `events.unsubscribe`, a loopback-only
+  read-only observer channel for SoraAvatar. Existing requests and events are unchanged;
+  `"v"` stays `1`.
 
 ## 10. Implementation status (informative)
 

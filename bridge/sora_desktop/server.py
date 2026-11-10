@@ -97,6 +97,7 @@ class Client:
         self.approval_sent = False
         self.denial_sent = False
         self.client_name = ""
+        self.subscriber = False
 
     @property
     def writer(self) -> asyncio.Task[None]:
@@ -175,16 +176,19 @@ class Bridge:
             thread_name_prefix="soradsk-turn",
         )
         self._clients: set[Client] = set()
+        self._subscribers: set[Client] = set()
         self._active_turns: dict[str, str] = {}
         self._server: Any = None
         self._watch_task: asyncio.Task[None] | None = None
         self._stop = asyncio.Event()
+        self._loop: asyncio.AbstractEventLoop | None = None
         self.port = config.port
 
     # -- lifecycle -------------------------------------------------------------
 
     async def run(self) -> None:
         ensure_paths()
+        self._loop = asyncio.get_running_loop()
         max_frame = max(
             1024 * 1024,
             int(self.config.max_upload_mb * 1024 * 1024 * 4 / 3) + 1024 * 1024,
@@ -285,6 +289,7 @@ class Bridge:
             pass
         finally:
             self._clients.discard(client)
+            self._subscribers.discard(client)
             if client.device_token:
                 self.runtime.uploads.release(client.device_token)
             await client.close()
@@ -481,6 +486,7 @@ class Bridge:
                         )
                         await client.close(CLOSE_UNAUTHORIZED, "revoked")
                         self._clients.discard(client)
+                        self._subscribers.discard(client)
             except asyncio.CancelledError:
                 return
             except Exception:
@@ -493,6 +499,10 @@ class Bridge:
         params = frame.body
         if frame.type == "chat.send":
             return self._chat_send(client, params)
+        if frame.type == "events.subscribe":
+            return self._subscribe(client)
+        if frame.type == "events.unsubscribe":
+            return self._unsubscribe(client)
         if frame.type == "turn.interrupt":
             return self._interrupt(params)
         if frame.type == "media.upload":
@@ -629,19 +639,18 @@ class Bridge:
         self._active_turns[session_id] = turn_id
 
         def after() -> None:
-            client.enqueue(
-                event_frame(
-                    "message",
-                    {
-                        "session_id": session_id,
-                        "turn_id": turn_id,
-                        "message_id": message_id,
-                        "role": "user",
-                        "text": text,
-                        "ts": _now_ms(),
-                        "attachments": [public_attachment(record) for record in consumed],
-                    },
-                )
+            self._emit_turn_event(
+                client,
+                "message",
+                {
+                    "session_id": session_id,
+                    "turn_id": turn_id,
+                    "message_id": message_id,
+                    "role": "user",
+                    "text": text,
+                    "ts": _now_ms(),
+                    "attachments": [public_attachment(record) for record in consumed],
+                },
             )
             asyncio.create_task(
                 self._run_turn(
@@ -673,6 +682,51 @@ class Bridge:
                 ERROR_NO_APPROVAL, f"approval {approval_id} is not pending"
             )
         return RequestOutcome({"approval_id": approval_id, "approved": approved})
+
+    def _subscribe(self, client: Client) -> RequestOutcome:
+        """Let a trusted local observer receive turn events from every client.
+
+        SoraAvatar uses this to mirror agent activity without owning a chat
+        session.  It is deliberately limited to loopback clients: a paired
+        remote device must not gain visibility into unrelated conversations.
+        """
+        if not client.trusted:
+            raise BridgeError(
+                ERROR_UNAUTHORIZED,
+                "event observation is limited to trusted loopback clients",
+            )
+        self._subscribers.add(client)
+        client.subscriber = True
+        log.info(
+            "client %s observing turn events",
+            _token_prefix(client.device_token),
+        )
+        return RequestOutcome({"subscribed": True})
+
+    def _unsubscribe(self, client: Client) -> RequestOutcome:
+        self._subscribers.discard(client)
+        client.subscriber = False
+        return RequestOutcome({"subscribed": False})
+
+    def _emit_turn_event(
+        self, source: Client, event_type: str, payload: dict[str, Any]
+    ) -> None:
+        """Queue a turn event for the source and every local observer.
+
+        Turn workers call this from another thread, so all subscriber
+        bookkeeping is deferred to the event loop.
+        """
+        loop = self._loop
+        if loop is None or loop.is_closed():
+            return
+        frame = event_frame(event_type, payload)
+        loop.call_soon_threadsafe(self._fan_out, source, frame)
+
+    def _fan_out(self, source: Client, frame: dict[str, Any]) -> None:
+        source.enqueue(frame)
+        for subscriber in list(self._subscribers):
+            if subscriber is not source:
+                subscriber.enqueue(frame)
 
     def _upload(self, client: Client, params: dict[str, Any]) -> RequestOutcome:
         name = params.get("name")
@@ -740,7 +794,9 @@ class Bridge:
                     turn_id=turn_id,
                     text=text,
                     attachments=attachments,
-                    emit=client.thread_emit,
+                    emit=lambda event_type, payload: self._emit_turn_event(
+                        client, event_type, payload
+                    ),
                 ),
             )
         except Exception as exc:
@@ -755,7 +811,7 @@ class Bridge:
         }
         if outcome.error:
             payload["error"] = outcome.error
-        client.enqueue(event_frame("turn.end", payload))
+        self._emit_turn_event(client, "turn.end", payload)
         try:
             meta = await loop.run_in_executor(
                 self.executor, self.runtime.catalog.meta, session_id
