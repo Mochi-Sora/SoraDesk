@@ -234,6 +234,7 @@ async def _pairing_session() -> None:
 
             token = ledger.approve_code(code)
             check("CLI approved code", isinstance(token, str))
+            assert token is not None
             approved = await client.wait_event("pairing.approved", timeout=5)
             check("approval event token", approved["event"]["device_token"] == token)
 

@@ -1,0 +1,8 @@
+{
+  "include": ["sora_desktop", "tests"],
+  "venvPath": "../../SoraAgent",
+  "venv": ".venv",
+  "extraPaths": ["../../SoraAgent"],
+  "pythonVersion": "3.10",
+  "typeCheckingMode": "standard"
+}

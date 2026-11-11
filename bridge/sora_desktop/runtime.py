@@ -69,7 +69,7 @@ class TurnContext:
     session_id: str
     turn_id: str
     emit: Emit
-    stream: "TurnStream"
+    stream: TurnStream
     tool_seq: int = 0
 
 
