@@ -45,6 +45,7 @@ from sora_agent.runtime_setup import (
     build_registry,
     build_sessions,
     context_window,
+    desktop_settings,
     load_runtime,
     quality_enabled,
     streaming_enabled,
@@ -301,8 +302,15 @@ class DesktopRuntime:
 
     def __init__(self, config: DesktopConfig) -> None:
         self.config = config
-        self.settings, self.secrets, self.configured = load_runtime()
+        self.settings, self.secrets, self.configured = load_runtime(
+            fallback=desktop_settings
+        )
         self.started_at = _now_ms()
+        if not self.configured:
+            log.warning(
+                "no SoraAgent config found; using desktop defaults "
+                "(local features on, provider=mock until `sora setup` writes one)"
+            )
         self.version = SORA_VERSION
 
         self.uploads = UploadStore(

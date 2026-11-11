@@ -55,6 +55,21 @@ sora-desktop pairing approve <code>
 sora-desktop pairing revoke <token-prefix>
 ```
 
+## First run without a SoraAgent config
+
+If `~/.sora_agent/config.json` does not exist, the bridge does not fall back to
+the bare legacy gateway defaults. It starts with desktop defaults instead:
+memory, identity, files, sessions, clock/calendar, and streaming are enabled,
+the provider stays `mock`, and the demo order tools stay off. This keeps the
+Memories and identity views meaningful before setup, without pretending a real
+model is configured. Run `sora setup` to write a config and choose a provider.
+
+The bridge log calls this out explicitly:
+
+```
+no SoraAgent config found; using desktop defaults (local features on, provider=mock until `sora setup` writes one)
+```
+
 ## Files
 
 | Path | Purpose |
