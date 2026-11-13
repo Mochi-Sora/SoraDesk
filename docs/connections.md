@@ -9,7 +9,7 @@ obtained**. Nothing above that boundary ever branches on the mode.
 | Mode | How the URL is obtained | Notes |
 |---|---|---|
 | **Local** | Read the bridge run-state file, dial `ws://127.0.0.1:<port>` | Optionally start/stop the bridge through the `sora-desktop` CLI |
-| **SSH** (default remote) | Supervise `ssh -N -L …`, dial `ws://127.0.0.1:<localport>` | Reuses the user's keys, ssh-agent and `~/.ssh/config` |
+| **SSH** (default remote) | Supervise `ssh -N -L -i <key> …`, dial `ws://127.0.0.1:<localport>` | Profile target (`user@host`), port (`22` default), and private key; `~/.ssh/config` aliases still resolve |
 | **IP** (opt-in) | Dial the profile's `wss://host:port` | Requires TLS + token; gated behind a warning |
 
 ## Local mode
@@ -49,16 +49,24 @@ ssh -N -T \
     -o ServerAliveCountMax=3 \
     -o StrictHostKeyChecking=accept-new \
     [-p <ssh_port>] \
+    -i <private_key> \
+    -o IdentitiesOnly=yes \
     -L 127.0.0.1:<localport>:127.0.0.1:<remote_port> \
-    <host>
+    <target>
 ```
 
-- `<host>` is `user@host` or a plain alias understood by `~/.ssh/config` (host aliases,
-  `Port`, `ProxyJump` all work for free).
+- `<target>` is `user@host` as you would type it after `ssh`, for example
+  `ubuntu@203.0.113.10`. A plain `~/.ssh/config` alias still resolves (including
+  `ProxyJump`), but the profile's SSH port takes precedence over the alias's `Port`.
+- `<private_key>` is the private-key file selected in the profile. `~/` is expanded,
+  the file must exist, and `IdentitiesOnly=yes` makes ssh offer only that key instead of
+  exhausting the agent's identity limit.
+- `ssh_port` defaults to `22`; enter a custom port for servers that listen elsewhere.
 - `remote_port` is the bridge port **on the remote machine's loopback** — default
   `18791`.
 - `<localport>` is chosen by binding `127.0.0.1:0` and releasing it, then passed to `ssh`.
-- `BatchMode=yes`: the app **never** prompts for or stores passwords. Key/agent auth only.
+- `BatchMode=yes`: the app **never** prompts for or stores passwords. Authentication is
+  the selected private key; an encrypted key must already be loaded in ssh-agent.
 - `ExitOnForwardFailure=yes`: if the forward can't be established, `ssh` exits nonzero and
   the supervisor reports a real error instead of hanging.
 - `-T -N`: no remote command, no TTY.
@@ -89,15 +97,16 @@ Persisted in the Tauri app-config directory (`profiles.json`):
 |---|---|
 | `id`, `name` | identity + display name |
 | `mode` | `local` \| `ssh` \| `ip` |
-| `sshHost`, `sshPort?`, `sshRemotePort?` | SSH mode target |
+| `sshHost`, `sshPort?`, `sshKey?`, `sshRemotePort?` | SSH target, port (default 22), private-key path, remote bridge port |
 | `url` | IP mode endpoint (`wss://…`) |
 | `token` | device token issued by the pairing handshake (revocable) |
 | `autoConnect?` | connect on app start |
 
 Rules:
 
-- No passwords, ever — not stored, not prompted. Secrets may live in `~/.ssh/config`,
-  ssh-agent, or the OS keychain; the profile file holds only a revocable device token.
+- No passwords, ever — not stored, not prompted. The profile stores the **path** to the
+  private key, never the key material; ssh reads the file directly. The only secret in the
+  profile file is the revocable device token.
 - Tokens are replaced automatically when the server rotates them, and are cleared with
   "Forget token" in Settings (the owner should also `sora-desktop pairing revoke <token-prefix>`
   on the bridge host).

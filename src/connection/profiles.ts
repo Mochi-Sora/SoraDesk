@@ -12,6 +12,7 @@ export interface Profile {
   mode: ConnectionMode;
   sshHost?: string | null;
   sshPort?: number | null;
+  sshKey?: string | null;
   sshRemotePort?: number | null;
   url?: string | null;
   token?: string | null;

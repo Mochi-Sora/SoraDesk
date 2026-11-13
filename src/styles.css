@@ -977,6 +977,25 @@ body {
   border-color: var(--accent);
 }
 
+.input-with-button {
+  display: flex;
+  gap: 8px;
+}
+
+.input-with-button input {
+  flex: 1;
+  min-width: 0;
+}
+
+.input-with-button .btn {
+  flex: none;
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
 .checkbox-row {
   display: flex;
   align-items: center;

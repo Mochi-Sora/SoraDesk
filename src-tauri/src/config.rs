@@ -34,6 +34,8 @@ pub struct Profile {
     #[serde(default)]
     pub ssh_port: Option<u16>,
     #[serde(default)]
+    pub ssh_key: Option<String>,
+    #[serde(default)]
     pub ssh_remote_port: Option<u16>,
     #[serde(default)]
     pub url: Option<String>,

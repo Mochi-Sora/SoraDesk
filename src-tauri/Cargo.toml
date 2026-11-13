@@ -1,6 +1,6 @@
 [package]
 name = "soradesk"
-version = "0.1.0"
+version = "0.1.1"
 description = "Desktop client for the SoraAgent runtime"
 authors = ["Mochi-Sora <Mochi-Sora@users.noreply.github.com>"]
 edition = "2024"
@@ -22,6 +22,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 tauri-plugin-process = "2"
 tauri-plugin-updater = "2"
+tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1.53.2", features = ["rt", "rt-multi-thread", "process", "net", "time", "sync", "macros"] }

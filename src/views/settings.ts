@@ -2,6 +2,7 @@
 // and the browser dev backend switch.
 
 import { button, el, type ViewContext, type ViewModule } from "../app";
+import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
 import type { Update } from "@tauri-apps/plugin-updater";
 import type { GatewayState } from "../connection/gateway";
 import { isTauri, type ConnectionMode, type Profile } from "../connection/profiles";
@@ -59,18 +60,55 @@ export const settingsView: ViewModule = {
 
     const sshBlock = el("div", "form-block hidden");
     const sshHostField = el("div", "field");
-    sshHostField.append(el("label", undefined, "SSH host (user@host or ssh_config alias)"));
+    sshHostField.append(el("label", undefined, "SSH target (user@host)"));
     const sshHostInput = el("input");
     sshHostInput.type = "text";
-    sshHostInput.placeholder = "marco@vps";
-    sshHostField.append(sshHostInput);
+    sshHostInput.placeholder = "ubuntu@203.0.113.10";
+    sshHostField.append(
+      sshHostInput,
+      el("span", "field-hint", "The same target you would pass to ssh."),
+    );
+
     const sshPortField = el("div", "field");
-    sshPortField.append(el("label", undefined, "SSH port (blank = ssh default)"));
+    sshPortField.append(el("label", undefined, "SSH port"));
     const sshPortInput = el("input");
     sshPortInput.type = "number";
     sshPortInput.min = "1";
     sshPortInput.max = "65535";
+    sshPortInput.placeholder = "22";
     sshPortField.append(sshPortInput);
+
+    const sshKeyField = el("div", "field");
+    sshKeyField.append(el("label", undefined, "Private key file"));
+    const sshKeyRow = el("div", "input-with-button");
+    const sshKeyInput = el("input");
+    sshKeyInput.type = "text";
+    sshKeyInput.placeholder = "~/.ssh/id_ed25519";
+    sshKeyInput.autocomplete = "off";
+    sshKeyInput.spellcheck = false;
+    const sshKeyBrowse = button("Browse…", "btn ghost small");
+    sshKeyBrowse.type = "button";
+    sshKeyBrowse.onclick = () => {
+      void (async () => {
+        try {
+          const selected = await openFileDialog({
+            multiple: false,
+            directory: false,
+            title: "Select SSH private key",
+          });
+          if (typeof selected === "string") sshKeyInput.value = selected;
+        } catch (error) {
+          formError.textContent = errorText(error);
+          formError.classList.remove("hidden");
+        }
+      })();
+    };
+    sshKeyRow.append(sshKeyInput, sshKeyBrowse);
+    sshKeyField.append(
+      sshKeyRow,
+      el("span", "field-hint", "The private key itself, not the .pub file."),
+    );
+
     const sshRemoteField = el("div", "field");
     sshRemoteField.append(el("label", undefined, "Desktop bridge port on the remote loopback"));
     const sshRemoteInput = el("input");
@@ -79,7 +117,7 @@ export const settingsView: ViewModule = {
     sshRemoteInput.max = "65535";
     sshRemoteInput.placeholder = "18791";
     sshRemoteField.append(sshRemoteInput);
-    sshBlock.append(sshHostField, sshPortField, sshRemoteField);
+    sshBlock.append(sshHostField, sshPortField, sshKeyField, sshRemoteField);
 
     const ipBlock = el("div", "form-block hidden");
     const ipNotice = el("p", "notice");
@@ -138,8 +176,9 @@ export const settingsView: ViewModule = {
       nameInput.value = source.name;
       modeSelect.value = source.mode;
       sshHostInput.value = source.sshHost ?? "";
-      sshPortInput.value = source.sshPort ? String(source.sshPort) : "";
-      sshRemoteInput.value = source.sshRemotePort ? String(source.sshRemotePort) : "";
+      sshPortInput.value = source.sshPort ? String(source.sshPort) : "22";
+      sshKeyInput.value = source.sshKey ?? "";
+      sshRemoteInput.value = source.sshRemotePort ? String(source.sshRemotePort) : "18791";
       ipInput.value = source.url ?? "";
       autoInput.checked = source.autoConnect ?? false;
       formError.classList.add("hidden");
@@ -173,13 +212,19 @@ export const settingsView: ViewModule = {
           mode,
           sshHost: mode === "ssh" ? sshHostInput.value.trim() || null : null,
           sshPort: mode === "ssh" ? numberOrNull(sshPortInput.value) : null,
+          sshKey: mode === "ssh" ? sshKeyInput.value.trim() || null : null,
           sshRemotePort: mode === "ssh" ? numberOrNull(sshRemoteInput.value) : null,
           url: mode === "ip" ? ipInput.value.trim() || null : null,
           token: editing?.token ?? null,
           autoConnect: autoInput.checked,
         };
         if (mode === "ssh" && !profile.sshHost) {
-          formError.textContent = "SSH mode needs a host.";
+          formError.textContent = "SSH mode needs a target (user@host).";
+          formError.classList.remove("hidden");
+          return;
+        }
+        if (mode === "ssh" && !profile.sshKey) {
+          formError.textContent = "SSH mode needs a private key file.";
           formError.classList.remove("hidden");
           return;
         }
