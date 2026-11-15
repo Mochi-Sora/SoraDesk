@@ -319,7 +319,7 @@ class DesktopRuntime:
         )
 
         self.provider = build_provider(self.settings, self.secrets)
-        self.registry = build_registry(self.settings)
+        self.registry = build_registry(self.settings, secrets=self.secrets)
         try:
             self.identity = build_identity(self.settings)
         except Exception:
