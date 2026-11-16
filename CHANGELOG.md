@@ -2,7 +2,7 @@
 
 All notable changes to SoraDesk are documented here.
 
-## [Unreleased]
+## [0.2.0] - 2026-11-16
 
 ### Added
 
@@ -15,6 +15,7 @@ All notable changes to SoraDesk are documented here.
 - The bridge forwards SoraAgent's specialist runner and registry into the chat
   handler, so the main agent can route work to specialists. This requires
   SoraAgent 0.2.0 or newer.
+- App, protocol, Tauri, and Cargo versions are now 0.2.0.
 
 ## [0.1.1] - 2026-11-13
 
