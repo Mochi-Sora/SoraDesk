@@ -1105,3 +1105,28 @@ body {
     opacity: 0;
   }
 }
+
+/* Specialists (delegation agents) */
+.specialists-store {
+  margin-top: 8px;
+}
+
+.specialist-row {
+  cursor: default;
+  align-items: flex-start;
+}
+
+.specialist-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.specialist-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}

@@ -17,6 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Any
 
+from sora_agent.delegation import DelegationError
 from sora_agent.files import Attachment
 from websockets.asyncio.server import ServerConnection, serve
 from websockets.exceptions import ConnectionClosed
@@ -342,6 +343,9 @@ class Bridge:
         except BridgeError as exc:
             client.enqueue(error_response(frame.id, exc.code, exc.message, exc.details))
             return
+        except DelegationError as exc:
+            client.enqueue(error_response(frame.id, ERROR_BAD_REQUEST, str(exc)))
+            return
         except Exception as exc:
             log.exception("request %s failed", frame.type)
             client.enqueue(
@@ -543,6 +547,35 @@ class Bridge:
             return RequestOutcome(result)
         if frame.type == "memory.stats":
             result = await loop.run_in_executor(self.executor, self.runtime.memory_stats)
+            return RequestOutcome(result)
+        if frame.type == "specialists.list":
+            result = await loop.run_in_executor(
+                self.executor, self.runtime.specialists_list
+            )
+            return RequestOutcome(result)
+        if frame.type == "specialists.set_status":
+            agent_id = _require_string(params, "id")
+            status = _require_string(params, "status")
+            result = await loop.run_in_executor(
+                self.executor,
+                functools.partial(
+                    self.runtime.specialist_set_status, agent_id, status
+                ),
+            )
+            return RequestOutcome(result)
+        if frame.type == "specialists.delete":
+            agent_id = _require_string(params, "id")
+            result = await loop.run_in_executor(
+                self.executor,
+                functools.partial(self.runtime.specialist_delete, agent_id),
+            )
+            return RequestOutcome(result)
+        if frame.type == "specialists.promote":
+            agent_id = _require_string(params, "id")
+            result = await loop.run_in_executor(
+                self.executor,
+                functools.partial(self.runtime.specialist_promote, agent_id),
+            )
             return RequestOutcome(result)
         if frame.type == "calendar.list":
             limit = clamp_int(params.get("limit"), 200, 1, 500)

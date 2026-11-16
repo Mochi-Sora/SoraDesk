@@ -32,6 +32,12 @@ from sora_agent.channels.types import (
     OutboundMessage,
     TurnReply,
 )
+from sora_agent.delegation import (
+    DelegationAgent,
+    DelegationError,
+    DelegationStore,
+    SpecialistAgentRunner,
+)
 from sora_agent.files import Attachment
 from sora_agent.persona import apply_persona
 from sora_agent.runner import RunEvent
@@ -319,7 +325,10 @@ class DesktopRuntime:
         )
 
         self.provider = build_provider(self.settings, self.secrets)
-        self.registry = build_registry(self.settings, secrets=self.secrets)
+        self.delegations = DelegationStore()
+        self.registry = build_registry(
+            self.settings, secrets=self.secrets, delegation_store=self.delegations
+        )
         try:
             self.identity = build_identity(self.settings)
         except Exception:
@@ -357,6 +366,17 @@ class DesktopRuntime:
             )
         self.approval_mode = mode
         self.streaming = bool(config.streaming and streaming_enabled(self.settings))
+        self.specialist_runner = SpecialistAgentRunner(
+            self.settings,
+            self.secrets,
+            memory=self.memory,
+            approval=self.approvals,
+            max_tool_result_chars=self.settings.limits.max_tool_result_chars,
+            tool_timeout=self.settings.limits.tool_timeout,
+            provider_retries=self.settings.limits.provider_retries,
+            store=self.delegations,
+            redactor=getattr(self.identity, "redact_for_memory", None),
+        )
 
         prompt = apply_persona(
             CHAT_SYSTEM_PROMPT,
@@ -385,6 +405,7 @@ class DesktopRuntime:
             context_window=context_window(self.settings),
             streaming=self.streaming,
             file_understander=self.files,
+            specialist_runner=self.specialist_runner,
         )
         self._cancelled: set[str] = set()
         self._lock = threading.Lock()
@@ -595,6 +616,36 @@ class DesktopRuntime:
             },
         }
 
+    def specialists_list(self) -> dict[str, Any]:
+        agents = self.delegations.list(include_paused=True)
+        return {
+            "specialists": [_specialist_summary(agent) for agent in agents],
+            "store": str(self.delegations.root),
+        }
+
+    def specialist_set_status(self, agent_id: str, status: str) -> dict[str, Any]:
+        if status not in {"active", "paused"}:
+            raise DelegationError("status must be active or paused")
+        agent = self.delegations.get(agent_id)
+        if agent is None:
+            raise DelegationError(f"unknown specialist {agent_id!r}")
+        agent.status = status
+        self.delegations.save(agent)
+        return _specialist_summary(agent)
+
+    def specialist_delete(self, agent_id: str) -> dict[str, Any]:
+        if not self.delegations.delete(agent_id):
+            raise DelegationError(f"unknown specialist {agent_id!r}")
+        return {"deleted": agent_id}
+
+    def specialist_promote(self, agent_id: str) -> dict[str, Any]:
+        agent = self.delegations.get(agent_id)
+        if agent is None:
+            raise DelegationError(f"unknown specialist {agent_id!r}")
+        agent.metadata.pop("provisional", None)
+        self.delegations.save(agent)
+        return _specialist_summary(agent)
+
     def calendar_list(self, limit: int = 200) -> dict[str, Any]:
         if self.calendar is False or self.calendar is None:
             return {"items": [], "enabled": False, "error": None}
@@ -611,6 +662,22 @@ class DesktopRuntime:
             "enabled": True,
             "error": None,
         }
+
+
+def _specialist_summary(agent: DelegationAgent) -> dict[str, Any]:
+    return {
+        "id": agent.id,
+        "name": agent.name,
+        "description": agent.description,
+        "when_to_use": agent.when_to_use,
+        "status": agent.status,
+        "provider": agent.provider,
+        "model": agent.model,
+        "tools": list(agent.tools),
+        "created_by": agent.created_by,
+        "provisional": bool(agent.metadata.get("provisional")),
+        "version": int(agent.version),
+    }
 
 
 def _calendar_item(item: CalendarItem) -> dict[str, Any]:

@@ -2,6 +2,20 @@
 
 All notable changes to SoraDesk are documented here.
 
+## [Unreleased]
+
+### Added
+
+- **Specialists** view and bridge API (`specialists.list`, `set_status`,
+  `delete`, `promote`) for persistent delegation agents created by SoraAgent's
+  `sora delegate` CLI or opt-in auto-creation.
+
+### Changed
+
+- The bridge forwards SoraAgent's specialist runner and registry into the chat
+  handler, so the main agent can route work to specialists. This requires
+  SoraAgent 0.2.0 or newer.
+
 ## [0.1.1] - 2026-11-13
 
 ### Added

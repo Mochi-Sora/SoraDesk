@@ -3,7 +3,13 @@
 
 import type { PairingState, StatusPayload } from "./connection/client";
 import type { ProfilesState } from "./connection/profiles";
-import type { AttachmentMeta, CalendarItem, MemoryStats, SessionMeta } from "./protocol";
+import type {
+  AttachmentMeta,
+  CalendarItem,
+  MemoryStats,
+  SessionMeta,
+  SpecialistSummary,
+} from "./protocol";
 
 export interface ToolChip {
   id: string;
@@ -71,6 +77,8 @@ export interface AppState {
   approvals: ApprovalCard[];
   calendar: CalendarItem[];
   memory: MemoryStats | null;
+  specialists: SpecialistSummary[];
+  specialistsStore: string;
   lastError: string | null;
   devMode: boolean;
 }

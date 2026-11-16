@@ -3,8 +3,8 @@
 [![CI](https://github.com/Mochi-Sora/SoraDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Mochi-Sora/SoraDesk/actions/workflows/ci.yml)
 
 A desktop client for the [SoraAgent](https://github.com/Mochi-Sora/SoraAgent) agent
-runtime — chat, sessions, calendar, memories, and settings over **local**, **SSH**, or
-**direct IP** connections, built with Tauri v2 (Rust shell + vanilla TypeScript UI).
+runtime — chat, sessions, specialists, calendar, memories, and settings over **local**,
+**SSH**, or **direct IP** connections, built with Tauri v2 (Rust shell + vanilla TypeScript UI).
 
 > **Status:** Live — v0.1.1 is published. The client, the local `sora_desktop` bridge, and
 > Phase 5 packaging are implemented against the frozen v1 protocol. The bridge lives in
@@ -40,6 +40,8 @@ same protocol frames the desktop app uses. Try:
 - attach files (paperclip, drag & drop, or paste), record a voice note with the microphone, and
   send — each uploads first (`media.upload`) and is echoed back on the user message;
 - while an answer streams, press Enter to **queue** the draft; Esc stops the turn;
+- open **Specialists** to inspect persistent delegation agents created with
+  `sora delegate create`, pause/resume them, promote provisional agents, or delete them;
 - `npm run smoke` — a 69-check conformance suite for [`docs/protocol.md`](docs/protocol.md)
   against the mock gateway.
 

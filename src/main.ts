@@ -25,6 +25,7 @@ import {
   type SessionMeta,
   type SessionUpdatedPayload,
   type SessionsListResult,
+  type SpecialistsListResult,
 } from "./protocol";
 import { createStore, type AppState } from "./store";
 import { chatView } from "./views/chat";
@@ -32,6 +33,7 @@ import { calendarView } from "./views/calendar";
 import { memoriesView } from "./views/memories";
 import { sessionsView } from "./views/sessions";
 import { settingsView } from "./views/settings";
+import { specialistsView } from "./views/specialists";
 
 const initialState: AppState = {
   profiles: { profiles: [], activeId: null },
@@ -48,6 +50,8 @@ const initialState: AppState = {
   approvals: [],
   calendar: [],
   memory: null,
+  specialists: [],
+  specialistsStore: "",
   lastError: null,
   devMode: !isTauri,
 };
@@ -71,6 +75,7 @@ const routes = [
   { id: "chat", label: "Chat", view: chatView },
   { id: "sessions", label: "Sessions", view: sessionsView },
   { id: "calendar", label: "Calendar", view: calendarView },
+  { id: "specialists", label: "Specialists", view: specialistsView },
   { id: "memories", label: "Memories", view: memoriesView },
   { id: "settings", label: "Settings", view: settingsView },
 ];
@@ -202,6 +207,43 @@ const actions: Actions = {
       store.set({ memory });
     } catch (error) {
       toast(`memory: ${errorText(error)}`, "error");
+    }
+  },
+  async refreshSpecialists() {
+    const state = store.get();
+    if (state.status.state !== "connected" || !state.paired) return;
+    try {
+      const result = await client.request<SpecialistsListResult>("specialists.list");
+      store.set({
+        specialists: result.specialists ?? [],
+        specialistsStore: result.store ?? "",
+      });
+    } catch (error) {
+      toast(`specialists: ${errorText(error)}`, "error");
+    }
+  },
+  async setSpecialistStatus(id, status) {
+    try {
+      await client.request("specialists.set_status", { id, status });
+      await actions.refreshSpecialists();
+    } catch (error) {
+      toast(`specialists: ${errorText(error)}`, "error");
+    }
+  },
+  async deleteSpecialist(id) {
+    try {
+      await client.request("specialists.delete", { id });
+      await actions.refreshSpecialists();
+    } catch (error) {
+      toast(`specialists: ${errorText(error)}`, "error");
+    }
+  },
+  async promoteSpecialist(id) {
+    try {
+      await client.request("specialists.promote", { id });
+      await actions.refreshSpecialists();
+    } catch (error) {
+      toast(`specialists: ${errorText(error)}`, "error");
     }
   },
   async approve(approvalId) {

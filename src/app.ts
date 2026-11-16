@@ -20,6 +20,10 @@ export interface Actions {
   refreshSessions(): Promise<void>;
   refreshCalendar(): Promise<void>;
   refreshMemory(): Promise<void>;
+  refreshSpecialists(): Promise<void>;
+  setSpecialistStatus(id: string, status: string): Promise<void>;
+  deleteSpecialist(id: string): Promise<void>;
+  promoteSpecialist(id: string): Promise<void>;
   approve(approvalId: string): Promise<void>;
   deny(approvalId: string): Promise<void>;
   saveProfile(profile: Profile): Promise<void>;

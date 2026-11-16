@@ -15,6 +15,10 @@ export type RequestType =
   | "sessions.history"
   | "memory.stats"
   | "calendar.list"
+  | "specialists.list"
+  | "specialists.set_status"
+  | "specialists.delete"
+  | "specialists.promote"
   | "approve"
   | "deny"
   | "ping";
@@ -247,6 +251,26 @@ export interface CalendarListResult {
   items: CalendarItem[];
   enabled?: boolean;
   error?: string | null;
+}
+
+/** A persistent specialist (delegation agent) from SoraAgent's registry. */
+export interface SpecialistSummary {
+  id: string;
+  name: string;
+  description: string;
+  when_to_use: string;
+  status: "active" | "paused" | string;
+  provider: string;
+  model: string;
+  tools: string[];
+  created_by: string;
+  provisional: boolean;
+  version: number;
+}
+
+export interface SpecialistsListResult {
+  specialists: SpecialistSummary[];
+  store: string;
 }
 
 // --- chat events ---------------------------------------------------------------

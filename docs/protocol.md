@@ -102,6 +102,10 @@ ISO-8601 strings, and `memory.stats` carries the bytes/counts from `memory.docto
 | `sessions.history` | `session_id`, `limit?: number` (default 100), `before?: string` (opaque cursor) | `{session_id, messages: [HistoryMessage], next_cursor?}` |
 | `memory.stats` | — | `MemoryStats` (§5) |
 | `calendar.list` | `limit?: number` (default 200, capped at 500) | `{items: [CalendarItem], enabled, error?}` |
+| `specialists.list` | — | `{specialists: [SpecialistSummary], store: string}` (§3.4a) |
+| `specialists.set_status` | `id: string`, `status: "active" \| "paused"` | `SpecialistSummary` |
+| `specialists.delete` | `id: string` | `{deleted: string}` |
+| `specialists.promote` | `id: string` | `SpecialistSummary` (provisional flag cleared) |
 | `approve` | `approval_id` | `{approval_id, approved: true}` |
 | `deny` | `approval_id`, `reason?: string` | `{approval_id, approved: false}` |
 | `events.subscribe` | — | `{subscribed: true}` (local observer extension, §3.5) |
@@ -283,6 +287,37 @@ Rules:
 - The default window is SoraAgent's: events in the next 30 days plus all to-dos (including
   completed ones). The client currently exposes no date-range filter.
 - `kind` is `event` or `todo`; `importance` is `important`, `balanced`, or `not important`.
+
+### 3.4a `specialists.*`
+
+SoraDesk exposes SoraAgent's persistent specialists (delegation agents) for
+inspection and management. Creation stays in the CLI (`sora delegate create`)
+or is opt-in through the main agent; the bridge does not create agents.
+
+```json
+{
+  "specialists": [
+    {
+      "id": "research-analyst",
+      "name": "Research Analyst",
+      "description": "Finds and cites public sources",
+      "when_to_use": "research, citations, literature",
+      "status": "active",
+      "provider": "",
+      "model": "",
+      "tools": ["research"],
+      "created_by": "user",
+      "provisional": false,
+      "version": 1
+    }
+  ],
+  "store": "/home/user/.sora_agent/delegations"
+}
+```
+
+`set_status` pauses/resumes an agent without deleting it. `delete` removes the
+manifest but keeps the workspace unless the CLI is used with `--workspace`.
+`promote` clears the provisional marker on an auto-created specialist.
 
 ### 3.5 Local event observation (`events.subscribe`)
 
