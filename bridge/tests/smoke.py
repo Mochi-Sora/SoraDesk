@@ -291,7 +291,7 @@ async def _client_session(url: str) -> None:
         check("loopback is paired", hello["paired"] is True)
         check("protocol v1", hello["protocol"] == 1)
         check("specialists feature", hello.get("features") == ["specialists"])
-        check("bridge version", hello.get("bridge_version") == "0.2.1")
+        check("bridge version", hello.get("bridge_version") == "0.2.2")
         check("limits advertise upload", hello["limits"]["max_upload_bytes"] == 25 * 1024 * 1024)
         check("limits advertise fetch", hello["limits"]["max_fetch_bytes"] == 25 * 1024 * 1024)
         check("device token returned", isinstance(hello.get("device_token"), str))

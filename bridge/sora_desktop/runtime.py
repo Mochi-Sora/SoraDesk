@@ -52,8 +52,10 @@ from sora_agent.runtime_setup import (
     build_sessions,
     context_window,
     desktop_settings,
+    feature_enabled,
     load_runtime,
     quality_enabled,
+    state_root_path,
     streaming_enabled,
 )
 
@@ -406,6 +408,10 @@ class DesktopRuntime:
             streaming=self.streaming,
             file_understander=self.files,
             specialist_runner=self.specialist_runner,
+            state_enabled=feature_enabled(
+                self.settings, "state", "SORA_STATE"
+            ),
+            state_root=state_root_path(self.settings),
         )
         self._cancelled: set[str] = set()
         self._lock = threading.Lock()

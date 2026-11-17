@@ -1,6 +1,6 @@
 [package]
 name = "soradesk"
-version = "0.2.1"
+version = "0.2.2"
 description = "Desktop client for the SoraAgent runtime"
 authors = ["Mochi-Sora <Mochi-Sora@users.noreply.github.com>"]
 edition = "2024"

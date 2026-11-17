@@ -6,7 +6,7 @@ A desktop client for the [SoraAgent](https://github.com/Mochi-Sora/SoraAgent) ag
 runtime — chat, sessions, specialists, calendar, memories, and settings over **local**,
 **SSH**, or **direct IP** connections, built with Tauri v2 (Rust shell + vanilla TypeScript UI).
 
-> **Status:** Live — v0.2.1 is published. The client, the local `sora_desktop` bridge, and
+> **Status:** Live — v0.2.2 is published. The client, the local `sora_desktop` bridge, and
 > Phase 5 packaging are implemented against the frozen v1 protocol. The bridge lives in
 > [`bridge/sora_desktop/`](bridge/sora_desktop/) and imports SoraAgent directly;
 > `dev/mock-gateway.mjs` remains the reference server. Updater artifacts are signed;
@@ -16,7 +16,7 @@ runtime — chat, sessions, specialists, calendar, memories, and settings over *
 ## Download
 
 Get the latest build from [GitHub Releases](https://github.com/Mochi-Sora/SoraDesk/releases/latest).
-v0.2.1 ships a universal macOS `.dmg`, a Windows NSIS installer, and Linux
+v0.2.2 ships a universal macOS `.dmg`, a Windows NSIS installer, and Linux
 `.AppImage`, `.deb`, and `.rpm` packages. The updater artifacts are signed; the
 macOS and Windows installers are unsigned for now.
 
@@ -204,7 +204,7 @@ Settings → Updates checks the manifest at the endpoint in `tauri.conf.json`
 Update packages are signed with the Tauri updater key; the private key never lives in
 the repository. Release notes are in [CHANGELOG.md](CHANGELOG.md). The tag workflow builds macOS (universal), Linux, and Windows assets,
 notarizes macOS when the Apple secrets are present, signs Windows when the Authenticode
-secrets are present, and uploads `latest.json`. v0.2.1 was published without Apple
+secrets are present, and uploads `latest.json`. v0.2.2 was published without Apple
 notarization or Windows Authenticode, so those installers are unsigned; the updater
 packages are signed. See [`docs/release.md`](docs/release.md).
 

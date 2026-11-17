@@ -2,6 +2,18 @@
 
 All notable changes to SoraDesk are documented here.
 
+## [0.2.2] - 2026-11-17
+
+### Added
+
+- Desktop bridge now passes session-state configuration to SoraAgent 0.3.0+
+  (`features.state`, `SORA_STATE`, `SORA_STATE_ROOT`).
+
+### Changed
+
+- Requires SoraAgent 0.3.0 or newer for the state-aware `ChatHandler`.
+- App, protocol, Tauri, Cargo, and bridge versions are 0.2.2.
+
 ## [0.2.1] - 2026-11-16
 
 ### Fixed
