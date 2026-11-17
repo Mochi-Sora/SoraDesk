@@ -26,7 +26,16 @@ cd ../SoraDesk/bridge
 ../SoraAgent/.venv/bin/pip install -e .
 ```
 
-That provides the `sora-desktop` console script. To let the desktop app's Settings buttons
+That provides the `sora-desktop` console script. When updating an existing
+checkout, reinstall the bridge and restart it so the running process picks up
+new protocol request families:
+
+```sh
+../../SoraAgent/.venv/bin/pip install -e .
+../../SoraAgent/.venv/bin/sora-desktop restart
+```
+
+ To let the desktop app's Settings buttons
 find it, link it into the app's search path or export `SORA_DESKTOP_BIN`:
 
 ```sh

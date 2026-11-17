@@ -212,6 +212,10 @@ const actions: Actions = {
   async refreshSpecialists() {
     const state = store.get();
     if (state.status.state !== "connected" || !state.paired) return;
+    if (!state.features.includes("specialists")) {
+      store.set({ specialists: [], specialistsStore: "" });
+      return;
+    }
     try {
       const result = await client.request<SpecialistsListResult>("specialists.list");
       store.set({

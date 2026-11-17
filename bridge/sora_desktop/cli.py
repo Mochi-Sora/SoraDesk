@@ -15,6 +15,7 @@ import time
 from collections.abc import Sequence
 from pathlib import Path
 
+from . import __version__
 from .config import (
     CONFIG_PATH,
     LOG_PATH,
@@ -75,7 +76,7 @@ def _parser() -> argparse.ArgumentParser:
         prog="sora-desktop",
         description="Local WebSocket bridge between SoraDesk and SoraAgent.",
     )
-    parser.add_argument("--version", action="version", version="sora-desktop 0.1.0")
+    parser.add_argument("--version", action="version", version=f"sora-desktop {__version__}")
     parser.add_argument("-v", "--verbose", action="store_true", help="debug logging")
     sub = parser.add_subparsers(dest="command")
 

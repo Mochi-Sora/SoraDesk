@@ -2,6 +2,25 @@
 
 All notable changes to SoraDesk are documented here.
 
+## [0.2.1] - 2026-11-16
+
+### Fixed
+
+- The Specialists view now checks the bridge's advertised `features` before
+  requesting `specialists.list`. Older bridges show an actionable
+  "update the `sora-desktop` bridge" message instead of an `unknown request
+  type` error.
+- The bridge advertises `specialists` and reports its own version in `hello`
+  (`bridge_version`), so the client can distinguish an old bridge from a
+  SoraAgent/runtime problem.
+- `sora-desktop --version` now reads the bridge package version instead of a
+  hard-coded string.
+
+### Changed
+
+- Bridge package version is 0.2.1. Updating the app alone is not enough:
+  reinstall/restart the bridge in the same Python environment as SoraAgent.
+
 ## [0.2.0] - 2026-11-16
 
 ### Added

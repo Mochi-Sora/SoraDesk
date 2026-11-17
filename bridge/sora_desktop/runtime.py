@@ -414,8 +414,9 @@ class DesktopRuntime:
 
     @property
     def features(self) -> list[str]:
-        # SoraAgent has no mid-turn steering; clients queue while busy.
-        return []
+        # Additive request families this bridge understands.  SoraAgent has no
+        # mid-turn steering; clients queue while busy.
+        return ["specialists"]
 
     def limits(self) -> dict[str, int]:
         return {

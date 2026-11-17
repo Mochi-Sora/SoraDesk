@@ -3,7 +3,7 @@
 
 export const PROTOCOL_VERSION = 1;
 
-export const APP_VERSION = "0.2.0";
+export const APP_VERSION = "0.2.1";
 
 export type RequestType =
   | "hello"
@@ -133,6 +133,7 @@ export interface HelloResult {
   device_token?: string | null;
   pairing?: PairingInfo | null;
   gateway?: GatewayInfo | null;
+  bridge_version?: string;
   reason?: string | null;
   limits?: GatewayLimits | null;
   /** Additive request frames the bridge understands. SoraAgent advertises none. */

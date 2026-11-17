@@ -31,6 +31,7 @@ os.environ["SORA_CALENDAR_DB"] = str(TMP / "calendar.db")
 os.environ["SORA_PROVIDER"] = "mock"
 os.environ["SORA_TOOLS"] = "demo"
 os.environ["SORA_MEMORY"] = "0"
+os.environ["SORA_DELEGATIONS_ROOT"] = str(TMP / "delegations")
 os.environ["SORA_APPROVAL"] = "off"
 os.environ["SORA_FILES"] = "0"
 
@@ -289,10 +290,14 @@ async def _client_session(url: str) -> None:
         )
         check("loopback is paired", hello["paired"] is True)
         check("protocol v1", hello["protocol"] == 1)
-        check("no chat.inject feature", hello.get("features") == [])
+        check("specialists feature", hello.get("features") == ["specialists"])
+        check("bridge version", hello.get("bridge_version") == "0.2.1")
         check("limits advertise upload", hello["limits"]["max_upload_bytes"] == 25 * 1024 * 1024)
         check("limits advertise fetch", hello["limits"]["max_fetch_bytes"] == 25 * 1024 * 1024)
         check("device token returned", isinstance(hello.get("device_token"), str))
+        specialists = await client.request("specialists.list")
+        check("specialists list", isinstance(specialists.get("specialists"), list))
+        check("specialists store", isinstance(specialists.get("store"), str))
 
         ping = await client.request("ping", ts=123456)
         check("ping echoes ts", ping["ts"] == 123456)

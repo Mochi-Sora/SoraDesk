@@ -30,6 +30,16 @@ export const specialistsView: ViewModule = {
         list.append(el("p", "empty", "Connect to the desktop bridge to list specialists."));
         return;
       }
+      if (!state.features.includes("specialists")) {
+        list.append(
+          el(
+            "p",
+            "empty",
+            "This bridge does not support specialists. Update the `sora-desktop` bridge to SoraDesk 0.2.1 or newer, then reconnect.",
+          ),
+        );
+        return;
+      }
       if (state.specialists.length === 0) {
         list.append(
           el(

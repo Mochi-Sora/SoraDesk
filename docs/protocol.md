@@ -77,9 +77,11 @@ sequenceDiagram
   is the client's feature detection. The object is sent on both the paired and the
   `paired: false` branch, so a client knows its budget before it is approved.
 - `hello.result.features` is an optional array of additive request frames the bridge
-  understands. The SoraAgent bridge advertises `[]`: SoraAgent has no mid-turn steering, so
-  text typed while a turn runs is queued client-side. Treat an absent/empty list as "none of
-  them".
+  understands. The SoraDesk bridge advertises `["specialists"]`; older bridges advertise `[]`.
+  Treat an absent/empty list as "none of them" and hide/disable those views rather than sending
+  the request.
+- `hello.result.bridge_version` is the bridge package version (for example `"0.2.1"`). It is
+  additive and distinguishes an old bridge from a SoraAgent/runtime problem.
 - **Protocol mismatch**: if the first frame's `v` is unsupported, the server responds
   `{ok: false, error: {code: "protocol_mismatch"}}` and closes with 4400.
 
@@ -378,8 +380,8 @@ Streaming contract:
    id and keep rendering into it. A replacement is not a new message — no additional
    `message_id` is minted for the discarded text.
 7. Text typed while a turn runs is queued by the client and sent as the next `chat.send`
-   after `turn.end`. SoraAgent has no mid-turn steering, and the bridge advertises no
-   additive features (`hello.result.features` is `[]`).
+   after `turn.end`. SoraAgent has no mid-turn steering. The bridge's only advertised additive
+  feature is `specialists`.
 
 ## 5. `memory.stats` result
 
@@ -495,6 +497,9 @@ WebSocket close codes: **4400** protocol error · **4401** unauthorized/revoked 
   advertises `features: []` (no steering), replaces `cron.list` with read-only
   `calendar.list`, and reports the SoraAgent memory doctor shape. No envelope or event meaning
   changed, so `"v"` stays `1`.
+- **Bridge 0.2.1 (2026-11-16):** adds `specialists.list` / `set_status` / `delete` / `promote`,
+  advertises `features: ["specialists"]`, and reports `bridge_version`. Older bridges return an
+  `unknown request type` error for these frames; clients must use the feature flag.
 - **v1.5 (additive, 2026-11-10):** `events.subscribe` / `events.unsubscribe`, a loopback-only
   read-only observer channel for SoraAvatar. Existing requests and events are unchanged;
   `"v"` stays `1`.

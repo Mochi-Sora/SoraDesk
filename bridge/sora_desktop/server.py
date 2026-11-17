@@ -22,6 +22,7 @@ from sora_agent.files import Attachment
 from websockets.asyncio.server import ServerConnection, serve
 from websockets.exceptions import ConnectionClosed
 
+from . import __version__
 from .config import (
     LOG_PATH,
     DesktopConfig,
@@ -432,6 +433,7 @@ class Bridge:
                         "version": self.runtime.version,
                         "started_at": self.runtime.started_at,
                     },
+                    "bridge_version": __version__,
                     "reason": None if client.paired else reason,
                     "limits": self.runtime.limits(),
                     "features": self.runtime.features,
