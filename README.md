@@ -1,17 +1,71 @@
-# SoraDesk
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Mochi-Sora/SoraDesk/main/src-tauri/icons/icon.png" alt="SoraDesk" width="112">
+</p>
 
-[![CI](https://github.com/Mochi-Sora/SoraDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Mochi-Sora/SoraDesk/actions/workflows/ci.yml)
+<h1 align="center">SoraDesk</h1>
 
-A desktop client for the [SoraAgent](https://github.com/Mochi-Sora/SoraAgent) agent
-runtime — chat, sessions, specialists, calendar, memories, and settings over **local**,
-**SSH**, or **direct IP** connections, built with Tauri v2 (Rust shell + vanilla TypeScript UI).
+<p align="center"><strong>SoraAgent, on your desktop.</strong></p>
 
-> **Status:** Live — v0.2.2 is published. The client, the local `sora_desktop` bridge, and
-> Phase 5 packaging are implemented against the frozen v1 protocol. The bridge lives in
-> [`bridge/sora_desktop/`](bridge/sora_desktop/) and imports SoraAgent directly;
-> `dev/mock-gateway.mjs` remains the reference server. Updater artifacts are signed;
-> the macOS and Windows installers are not yet code-signed, so first launch may show a
-> Gatekeeper or SmartScreen warning. Settings → Updates reads GitHub Releases.
+<p align="center">
+  <a href="https://github.com/Mochi-Sora/SoraDesk/releases"><img src="https://img.shields.io/badge/version-0.2.2-1f6feb" alt="Version 0.2.2"></a>
+  <a href="https://tauri.app/"><img src="https://img.shields.io/badge/Tauri-v2-24c8db" alt="Tauri v2"></a>
+  <a href="https://github.com/Mochi-Sora/SoraDesk/releases"><img src="https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-555" alt="macOS, Windows, Linux"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--only-2ea44f" alt="AGPL-3.0-only"></a>
+</p>
+
+<p align="center">
+  <a href="https://discord.gg/s8W6JfBSMH">Discord</a> ·
+  <a href="https://mochi-sora.github.io/SoraOfficialWebsite/">Website</a> ·
+  <a href="https://github.com/Mochi-Sora/SoraDesk/releases/latest">Download</a> ·
+  <a href="docs/protocol.md">Protocol</a> ·
+  <a href="https://github.com/Mochi-Sora/SoraAgent">SoraAgent</a>
+</p>
+
+**SoraDesk is the native desktop client for [SoraAgent](https://github.com/Mochi-Sora/SoraAgent).** It gives a local or remote SoraAgent runtime a real window: streaming chat, persistent sessions, Specialists, calendar, memories, attachments, voice notes, approvals, and settings — over a direct local connection, a supervised SSH tunnel, or opt-in direct IP.
+
+> **Status:** v0.2.2 is published. SoraDesk is a **client**, not a standalone agent: it needs SoraAgent **0.3.0+** and the matching `sora-desktop` bridge. Updater artifacts are signed; macOS and Windows installers are unsigned, so first launch may show a Gatekeeper or SmartScreen warning.
+
+## At a glance
+
+**It is**
+
+- a Tauri v2 desktop app: a Rust transport shell and a vanilla TypeScript UI;
+- a client for one SoraAgent runtime, with the same protocol locally, over SSH, or over TLS;
+- a place to chat, inspect sessions, manage persistent Specialists, use the calendar, search memories, and approve consequential tool calls;
+- a small front end that deliberately does **not** duplicate the agent's state — sessions, calendar, memory, and identity stay in SoraAgent.
+
+**It is not**
+
+- a model, a hosted chat service, or a replacement for SoraAgent;
+- a mobile app;
+- a second agent with its own prompts, tools, or memory.
+
+**Best for**
+
+- people already running SoraAgent who want a native desktop surface;
+- a Mac/Windows/Linux workstation connecting to a home server or VPS over SSH;
+- anyone who prefers explicit approvals and local state to a hosted dashboard.
+
+## Start here
+
+| You want to… | Go to |
+| --- | --- |
+| Download and run the app | [Download](#download) |
+| Try the UI without Rust or SoraAgent | [UI development](#ui-development-without-rust-or-soraagent-recommended-first-run) |
+| Connect a real SoraAgent backend | [Real SoraAgent backend](#real-soraagent-backend) |
+| Connect over SSH to a VPS | [Real SoraAgent backend](#real-soraagent-backend) and [connection modes](docs/connections.md) |
+| Build the desktop app yourself | [Desktop app](#desktop-app-needs-the-rust-toolchain) |
+| Understand the client/server protocol | [docs/protocol.md](docs/protocol.md) |
+| Cut a release | [docs/release.md](docs/release.md) |
+| Ask a question | [Discord](https://discord.gg/s8W6JfBSMH) |
+
+## Why SoraDesk
+
+- **One protocol, three connections.** Local loopback, supervised SSH, or opt-in direct IP; no duplicated agent state.
+- **Chat that streams and asks.** Tool chips, file-edit previews, human approvals, stop/interrupt, and queued drafts.
+- **Specialists, managed.** Inspect, pause/resume, promote, or delete persistent delegation agents from the desktop.
+- **Native files and voice.** Paperclip, drag & drop, paste, image/audio/video/file upload, and microphone voice notes.
+- **Yours to inspect.** AGPL-3.0-only, local data, and a documented protocol with a mock gateway.
 
 ## Download
 
