@@ -264,7 +264,7 @@ packages are signed. See [`docs/release.md`](docs/release.md).
 
 ## Not done yet
 
-- macOS notarization and Windows Authenticode are not configured yet. The v0.1.1
+- macOS notarization and Windows Authenticode are not configured yet. The v0.2.2
   installers are unsigned; Gatekeeper and SmartScreen will warn on first launch — see
   [`docs/release.md`](docs/release.md).
 - A signed follow-up release is planned once the Apple and Windows certificates are
