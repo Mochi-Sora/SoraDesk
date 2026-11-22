@@ -6,12 +6,13 @@ SoraDesk ships as a Tauri v2 desktop bundle. Tagged builds are produced by
 
 ## Release status
 
-v0.2.2 is published. The updater key is configured as
-`TAURI_SIGNING_PRIVATE_KEY`, so every release produces signed updater artifacts.
-Apple notarization and Windows Authenticode secrets are not configured yet; the
-v0.1.1 macOS and Windows installers are unsigned. Gatekeeper and SmartScreen will
-warn on first launch. A signed follow-up release will be cut once the certificates
-are available.
+v0.2.2 is published. `main` also carries an unreleased interface polish pass
+(see [CHANGELOG.md](../CHANGELOG.md)); cut the next patch whenever it is ready.
+The updater key is configured as `TAURI_SIGNING_PRIVATE_KEY`, so every release
+produces signed updater artifacts. Apple notarization and Windows Authenticode
+secrets are not configured yet; the v0.1.1 macOS and Windows installers are
+unsigned. Gatekeeper and SmartScreen will warn on first launch. A signed
+follow-up release will be cut once the certificates are available.
 
 ## Updater key
 

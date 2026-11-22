@@ -23,7 +23,7 @@
 
 **SoraDesk is the native desktop client for [SoraAgent](https://github.com/Mochi-Sora/SoraAgent).** It gives a local or remote SoraAgent runtime a real window: streaming chat, persistent sessions, Specialists, calendar, memories, attachments, voice notes, approvals, and settings — over a direct local connection, a supervised SSH tunnel, or opt-in direct IP.
 
-> **Status:** v0.2.2 is published. SoraDesk is a **client**, not a standalone agent: it needs SoraAgent **0.3.0+** and the matching `sora-desktop` bridge. Updater artifacts are signed; macOS and Windows installers are unsigned, so first launch may show a Gatekeeper or SmartScreen warning.
+> **Status:** v0.2.2 is published. `main` also carries an interface polish pass for the next patch (see [CHANGELOG.md](CHANGELOG.md)). SoraDesk is a **client**, not a standalone agent: it needs SoraAgent **0.3.0+** and the matching `sora-desktop` bridge. Updater artifacts are signed; macOS and Windows installers are unsigned, so first launch may show a Gatekeeper or SmartScreen warning.
 
 ## At a glance
 
@@ -65,6 +65,7 @@
 - **Chat that streams and asks.** Tool chips, file-edit previews, human approvals, stop/interrupt, and queued drafts.
 - **Specialists, managed.** Inspect, pause/resume, promote, or delete persistent delegation agents from the desktop.
 - **Native files and voice.** Paperclip, drag & drop, paste, image/audio/video/file upload, and microphone voice notes.
+- **Polished at the edges.** Long session and profile names truncate cleanly at the 900 px minimum width, approval cards stay scoped to their conversation, and the Memories grid stays balanced on desktop and narrow windows.
 - **Yours to inspect.** AGPL-3.0-only, local data, and a documented protocol with a mock gateway.
 
 ## Download

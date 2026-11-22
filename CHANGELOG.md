@@ -2,6 +2,25 @@
 
 All notable changes to SoraDesk are documented here.
 
+## [Unreleased]
+
+### Fixed
+
+- Sidebar: the paired badge now hugs its text instead of stretching across the
+  footer.
+- Chat: long session titles ellipsize to one line, and **New session** / **Stop**
+  keep their labels on one line at the 900 px minimum window width.
+- Topbar: long connection-profile names and status text truncate cleanly, and
+  the profile picker is capped so the status chip and connect button stay
+  visible.
+- Approvals: cards are scoped to the open conversation and are removed when
+  their turn ends or the connection closes, so timed-out approvals no longer
+  linger above the composer.
+- Specialists: empty-state commands render as inline code instead of literal
+  backticks.
+- Memories: the card grid uses wider columns, keeping a 4×2 layout on desktop and
+  two columns at the minimum width without splitting paths mid-word.
+
 ## [0.2.2] - 2026-11-17
 
 ### Added
