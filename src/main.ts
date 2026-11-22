@@ -26,6 +26,7 @@ import {
   type SessionUpdatedPayload,
   type SessionsListResult,
   type SpecialistsListResult,
+  type TurnEndPayload,
 } from "./protocol";
 import { createStore, type AppState } from "./store";
 import { chatView } from "./views/chat";
@@ -94,6 +95,8 @@ const main = el("div", "main");
 const topbar = el("header", "topbar");
 const profileSelect = el("select", "select");
 const statusChip = el("span", "status-chip");
+const statusText = el("span", "status-text");
+statusChip.append(statusText);
 const connectBtn = button("Connect", "btn primary");
 topbar.append(profileSelect, statusChip, connectBtn);
 const viewHost = el("div", "view-host");
@@ -337,9 +340,10 @@ const renderChrome = (): void => {
     }
     profileSelect.value = state.profiles.activeId ?? "";
   }
+  const label = statusLabel(state);
   statusChip.className = `status-chip ${state.status.state}`;
-  statusChip.textContent = statusLabel(state);
-  statusChip.title = state.status.detail ?? "";
+  statusText.textContent = label;
+  statusChip.title = state.status.detail ? `${label} — ${state.status.detail}` : label;
   const live = ["connected", "connecting", "reconnecting"].includes(state.status.state);
   connectBtn.textContent = live ? "Disconnect" : "Connect";
   sidebarFoot.replaceChildren();
@@ -368,7 +372,11 @@ connectBtn.addEventListener("click", () => {
 
 client.onStatus((status) => {
   store.set({ status });
-  if (status.state === "disconnected") store.set({ paired: false });
+  if (status.state === "disconnected" || status.state === "unauthorized") {
+    // Pending approvals belong to a live turn on this connection; once it is gone
+    // they can no longer be answered, so do not leave a dead card on screen.
+    store.set({ paired: false, approvals: [] });
+  }
   if (status.state === "unauthorized") {
     toast("device token revoked — pair this device again", "error");
   }
@@ -408,6 +416,18 @@ client.onEvent((frame) => {
           },
         ],
       });
+      break;
+    }
+    case "turn.end": {
+      // An approval can only be answered while its turn is alive. A turn end
+      // means any still-listed approval was resolved or expired server-side.
+      const ended = payload<TurnEndPayload>(frame.event);
+      const approvals = store.get().approvals;
+      const remaining = approvals.filter(
+        (approval) =>
+          approval.sessionId !== ended.session_id || approval.turnId !== ended.turn_id,
+      );
+      if (remaining.length !== approvals.length) store.set({ approvals: remaining });
       break;
     }
     case "session.updated": {

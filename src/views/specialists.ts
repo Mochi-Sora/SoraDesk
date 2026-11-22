@@ -31,23 +31,23 @@ export const specialistsView: ViewModule = {
         return;
       }
       if (!state.features.includes("specialists")) {
-        list.append(
-          el(
-            "p",
-            "empty",
-            "This bridge does not support specialists. Update the `sora-desktop` bridge to SoraDesk 0.2.1 or newer, then reconnect.",
-          ),
+        const unsupported = el("p", "empty");
+        unsupported.append(
+          "This bridge does not support specialists. Update the ",
+          el("code", undefined, "sora-desktop"),
+          " bridge to SoraDesk 0.2.1 or newer, then reconnect.",
         );
+        list.append(unsupported);
         return;
       }
       if (state.specialists.length === 0) {
-        list.append(
-          el(
-            "p",
-            "empty",
-            "No specialists yet. Create one with `sora delegate create` in a terminal.",
-          ),
+        const empty = el("p", "empty");
+        empty.append(
+          "No specialists yet. Create one with ",
+          el("code", undefined, "sora delegate create"),
+          " in a terminal.",
         );
+        list.append(empty);
         return;
       }
       for (const specialist of state.specialists) {

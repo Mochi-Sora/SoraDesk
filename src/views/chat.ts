@@ -310,7 +310,12 @@ export const chatView: ViewModule = {
     const syncApprovals = (): void => {
       const state = ctx.store.get();
       approvalsEl.replaceChildren();
-      for (const approval of state.approvals) {
+      // Approvals are turn-scoped; only the open conversation may show them.
+      // Otherwise a card from another session lands above this composer.
+      const approvals = state.approvals.filter(
+        (approval) => approval.sessionId === state.activeSessionId,
+      );
+      for (const approval of approvals) {
         const card = el("div", "approval");
         const text = el("div", "approval-text");
         text.append(el("strong", undefined, `${approval.tool} wants approval`));
@@ -358,9 +363,11 @@ export const chatView: ViewModule = {
     const syncHeader = (): void => {
       const state = ctx.store.get();
       const session = state.sessions.find((candidate) => candidate.id === state.activeSessionId);
-      subtitle.textContent = session
+      const label = session
         ? session.title || session.id
         : state.activeSessionId ?? "new session";
+      subtitle.textContent = label;
+      subtitle.title = label;
       const connected = state.status.state === "connected";
       const canChat = connected && state.paired;
       const busy = state.chatBusy;
