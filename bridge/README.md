@@ -92,7 +92,7 @@ no SoraAgent config found; using desktop defaults (local features on, provider=m
 
 ## Protocol notes
 
-- `hello.result.features` is empty: SoraAgent has no mid-turn injection, so the
+- `hello.result.features` is `["specialists"]`: SoraAgent has no mid-turn injection, so the
   client queues text while a turn runs.
 - Streaming follows both `streaming` in the bridge config and SoraAgent's
   `features.streaming` / `SORA_STREAMING` setting. Deltas are coalesced by the

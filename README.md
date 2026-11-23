@@ -250,7 +250,7 @@ composer stays usable:
   remove one with its ✕.
 - **Esc** (or **Stop**) interrupts the turn.
 
-The bridge advertises `features: []`, so steering is not offered by the UI.
+The bridge advertises `features: ["specialists"]`; steering (`chat.inject`) is still not offered by the UI.
 
 ## Updates
 

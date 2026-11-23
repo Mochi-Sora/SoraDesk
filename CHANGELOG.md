@@ -37,7 +37,7 @@ All notable changes to SoraDesk are documented here.
 - Requires SoraAgent 0.3.0 or newer for the state-aware `ChatHandler`.
 - App, protocol, Tauri, Cargo, and bridge versions are 0.2.2.
 
-## [0.2.1] - 2026-11-16
+## [0.2.1] - 2026-11-17
 
 ### Fixed
 

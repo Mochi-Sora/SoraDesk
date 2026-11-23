@@ -122,7 +122,7 @@ jobs:
             SoraDesk is a native Tauri v2 desktop client for the SoraAgent runtime.
 
             - Chat, sessions, specialists, calendar, memories, and settings
-            - Specialists management for SoraAgent delegation agents (requires SoraAgent 0.2.0+)
+            - Specialists management for SoraAgent delegation agents (requires SoraAgent 0.3.0+)
             - **Upgrade note:** reinstall and restart the `sora-desktop` bridge (0.2.1+) so the Specialists API is available
             - Local, supervised SSH-tunnel, and opt-in direct-IP connections
             - Streaming replies, tool approvals, attachments, and voice notes

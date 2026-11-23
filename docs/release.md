@@ -98,7 +98,7 @@ server.
 
 Without these secrets the Windows job still builds and uploads installers, but they
 are unsigned and SmartScreen will warn until the certificate builds reputation. This
-is the state of the v0.1.1 Windows installer.
+is the state of the v0.2.3 Windows installer.
 
 Encode the `.pfx` as a single line before adding it as a secret:
 
@@ -152,8 +152,9 @@ Set the release secrets (repository → Settings → Secrets and variables → A
    `src-tauri/tauri.conf.json`, `src/protocol.ts` (`APP_VERSION`),
    `src-tauri/Cargo.toml` with its `Cargo.lock` entry, and the bridge
    (`bridge/pyproject.toml`, `bridge/sora_desktop/__init__.py`, and the version
-   assertion in `bridge/tests/smoke.py`). Move the `[Unreleased]` CHANGELOG section
-   to a released heading and refresh the README badge. Run
+   assertion in `bridge/tests/smoke.py`). Give the CHANGELOG section a released
+   heading (start a new `[Unreleased]` heading at the top when the next cycle
+   begins) and refresh the README badge. Run
    `npm run check-versions` to confirm they agree — CI enforces the
    package/tauri/protocol trio.
 2. Commit, then tag and push:

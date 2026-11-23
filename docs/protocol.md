@@ -516,8 +516,10 @@ WebSocket close codes: **4400** protocol error · **4401** unauthorized/revoked 
 - **Client:** SoraDesk implements everything above and queues text while a turn runs. The
   bundled mock gateway ([`dev/mock-gateway.mjs`](../dev/mock-gateway.mjs)) is the reference
   server used by the Node smoke suite.
-- **Server:** [`bridge/sora_desktop/`](../bridge/sora_desktop/) implements v1 through v1.3
-  plus read-only `calendar.list` and the SoraAgent `memory.stats` shape. It runs SoraAgent's
+- **Server:** [`bridge/sora_desktop/`](../bridge/sora_desktop/) implements v1 through v1.5 —
+  including `hello.result.features`, `events.subscribe` / `events.unsubscribe`, and the
+  additive `specialists.*` family — plus read-only `calendar.list` and the SoraAgent
+  `memory.stats` shape. It runs SoraAgent's
   own `ChatHandler`, so approvals, history, and tools come from the same runtime the CLI
   uses. The bridge emits `delta` frames when streaming is enabled and one complete
   `message` per segment otherwise; `chat.inject` is intentionally unsupported.
