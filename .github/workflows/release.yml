@@ -128,7 +128,7 @@ jobs:
             - Streaming replies, tool approvals, attachments, and voice notes
             - Signed updater artifacts for in-app updates
 
-            **Requirements:** a local SoraAgent installation and the `sora-desktop` bridge. See the README for setup.
+            **Requirements:** SoraAgent 0.3.0+ and the matching `sora-desktop` bridge. See the README for setup.
 
             ### Install
 
@@ -164,3 +164,24 @@ jobs:
             src-tauri/target/**/release/bundle/appimage/*.tar.gz
             src-tauri/target/**/release/bundle/nsis/*.exe
             src-tauri/target/**/release/bundle/nsis/*.sig
+
+  # Every matrix leg uploads its own copy of latest.json, so the manifest only
+  # covers all platforms once the last build finishes. Publishing before then
+  # advertises a subset and makes update checks fail on the missing platforms
+  # ("None of the fallback platforms … were found"). This job fails the run when
+  # that happened, and stays red until the release is repaired.
+  finalize:
+    name: Verify release completeness
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check latest.json covers every platform
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node dev/check-release.mjs --tag "${{ github.ref_name }}" --retry 120

@@ -147,9 +147,15 @@ Set the release secrets (repository → Settings → Secrets and variables → A
 
 ## Cut a release
 
-1. Bump the version in `package.json`, `src-tauri/tauri.conf.json`, and
-   `src/protocol.ts` (`APP_VERSION`). Run `npm run check-versions` to confirm they
-   agree — CI enforces the same check.
+1. Bump the version everywhere it is stamped: `package.json` and
+   `package-lock.json` (`npm version 0.2.4 --no-git-tag-version` updates both),
+   `src-tauri/tauri.conf.json`, `src/protocol.ts` (`APP_VERSION`),
+   `src-tauri/Cargo.toml` with its `Cargo.lock` entry, and the bridge
+   (`bridge/pyproject.toml`, `bridge/sora_desktop/__init__.py`, and the version
+   assertion in `bridge/tests/smoke.py`). Move the `[Unreleased]` CHANGELOG section
+   to a released heading and refresh the README badge. Run
+   `npm run check-versions` to confirm they agree — CI enforces the
+   package/tauri/protocol trio.
 2. Commit, then tag and push:
 
    ```sh
@@ -158,12 +164,26 @@ Set the release secrets (repository → Settings → Secrets and variables → A
    ```
 
 3. The workflow creates a **draft** GitHub release with the bundles, updater
-   signatures, and `latest.json`.
-4. Download and smoke-test the draft assets, confirm `latest.json` contains every
-   platform, then publish the release.
-5. The updater endpoint
+   signatures, and `latest.json`, then runs **Verify release completeness**
+   (`dev/check-release.mjs`). That job asserts the manifest names the tagged
+   version, lists every platform from the build matrix, points only at attached
+   assets, and — once the release is public — that every platform URL returns 200.
+   Each matrix leg uploads its own `latest.json`, so this is the signal that the
+   last build has landed.
+4. **Wait for the completeness job to pass before publishing.** Publishing while a
+   platform is still building advertises a partial manifest, and clients on the
+   missing platform fail their update check with
+   `None of the fallback platforms … were found in the response platforms object`.
+   If that happens, set the release back to draft until the job is green, or
+   re-run it after the manifest is repaired:
+
+   ```sh
+   node dev/check-release.mjs --tag v0.2.3
+   ```
+5. Download and smoke-test the draft assets, then publish the release.
+6. The updater endpoint
    (`https://github.com/Mochi-Sora/SoraDesk/releases/latest/download/latest.json`)
-   only serves published releases, so existing clients see the update after step 4.
+   only serves published releases, so existing clients see the update after step 5.
 
 ## Security notes
 

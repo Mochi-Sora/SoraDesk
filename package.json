@@ -12,7 +12,8 @@
     "tauri": "tauri",
     "mock": "node dev/mock-gateway.mjs",
     "smoke": "node dev/smoke.mjs",
-    "check-versions": "node dev/check-versions.mjs"
+    "check-versions": "node dev/check-versions.mjs",
+    "check-release": "node dev/check-release.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
