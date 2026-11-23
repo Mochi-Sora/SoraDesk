@@ -7,7 +7,7 @@
 <p align="center"><strong>SoraAgent, on your desktop.</strong></p>
 
 <p align="center">
-  <a href="https://github.com/Mochi-Sora/SoraDesk/releases"><img src="https://img.shields.io/badge/version-0.2.2-1f6feb" alt="Version 0.2.2"></a>
+  <a href="https://github.com/Mochi-Sora/SoraDesk/releases"><img src="https://img.shields.io/badge/version-0.2.3-1f6feb" alt="Version 0.2.3"></a>
   <a href="https://tauri.app/"><img src="https://img.shields.io/badge/Tauri-v2-24c8db" alt="Tauri v2"></a>
   <a href="https://github.com/Mochi-Sora/SoraDesk/releases"><img src="https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-555" alt="macOS, Windows, Linux"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--only-2ea44f" alt="AGPL-3.0-only"></a>
@@ -23,7 +23,7 @@
 
 **SoraDesk is the native desktop client for [SoraAgent](https://github.com/Mochi-Sora/SoraAgent).** It gives a local or remote SoraAgent runtime a real window: streaming chat, persistent sessions, Specialists, calendar, memories, attachments, voice notes, approvals, and settings — over a direct local connection, a supervised SSH tunnel, or opt-in direct IP.
 
-> **Status:** v0.2.2 is published. `main` also carries an interface polish pass for the next patch (see [CHANGELOG.md](CHANGELOG.md)). SoraDesk is a **client**, not a standalone agent: it needs SoraAgent **0.3.0+** and the matching `sora-desktop` bridge. Updater artifacts are signed; macOS and Windows installers are unsigned, so first launch may show a Gatekeeper or SmartScreen warning.
+> **Status:** v0.2.3 is published. SoraDesk is a **client**, not a standalone agent: it needs SoraAgent **0.3.0+** and the matching `sora-desktop` bridge. Updater artifacts are signed; macOS and Windows installers are unsigned, so first launch may show a Gatekeeper or SmartScreen warning.
 
 ## At a glance
 
@@ -71,7 +71,7 @@
 ## Download
 
 Get the latest build from [GitHub Releases](https://github.com/Mochi-Sora/SoraDesk/releases/latest).
-v0.2.2 ships a universal macOS `.dmg`, a Windows NSIS installer, and Linux
+v0.2.3 ships a universal macOS `.dmg`, a Windows NSIS installer, and Linux
 `.AppImage`, `.deb`, and `.rpm` packages. The updater artifacts are signed; the
 macOS and Windows installers are unsigned for now.
 
@@ -259,13 +259,13 @@ Settings → Updates checks the manifest at the endpoint in `tauri.conf.json`
 Update packages are signed with the Tauri updater key; the private key never lives in
 the repository. Release notes are in [CHANGELOG.md](CHANGELOG.md). The tag workflow builds macOS (universal), Linux, and Windows assets,
 notarizes macOS when the Apple secrets are present, signs Windows when the Authenticode
-secrets are present, and uploads `latest.json`. v0.2.2 was published without Apple
+secrets are present, and uploads `latest.json`. v0.2.3 was published without Apple
 notarization or Windows Authenticode, so those installers are unsigned; the updater
 packages are signed. See [`docs/release.md`](docs/release.md).
 
 ## Not done yet
 
-- macOS notarization and Windows Authenticode are not configured yet. The v0.2.2
+- macOS notarization and Windows Authenticode are not configured yet. The v0.2.3
   installers are unsigned; Gatekeeper and SmartScreen will warn on first launch — see
   [`docs/release.md`](docs/release.md).
 - A signed follow-up release is planned once the Apple and Windows certificates are

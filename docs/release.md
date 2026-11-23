@@ -6,13 +6,12 @@ SoraDesk ships as a Tauri v2 desktop bundle. Tagged builds are produced by
 
 ## Release status
 
-v0.2.2 is published. `main` also carries an unreleased interface polish pass
-(see [CHANGELOG.md](../CHANGELOG.md)); cut the next patch whenever it is ready.
-The updater key is configured as `TAURI_SIGNING_PRIVATE_KEY`, so every release
-produces signed updater artifacts. Apple notarization and Windows Authenticode
-secrets are not configured yet; the v0.1.1 macOS and Windows installers are
-unsigned. Gatekeeper and SmartScreen will warn on first launch. A signed
-follow-up release will be cut once the certificates are available.
+v0.2.3 is published. The updater key is configured as
+`TAURI_SIGNING_PRIVATE_KEY`, so every release produces signed updater artifacts.
+Apple notarization and Windows Authenticode secrets are not configured yet; the
+v0.2.3 macOS and Windows installers are unsigned. Gatekeeper and SmartScreen will
+warn on first launch. A signed follow-up release will be cut once the certificates
+are available.
 
 ## Updater key
 
@@ -81,7 +80,7 @@ openssl base64 -A -in DeveloperID.p12 -out apple-certificate-base64.txt
 the certificate requires a Mac and a paid Apple Developer account; the CI build runs
 on GitHub's macOS runner. Without these secrets the macOS job still produces an
 ad-hoc-signed build, but Gatekeeper will warn on other machines and the release is
-not notarized. This is the state of the v0.2.2 macOS build.
+not notarized. This is the state of the v0.2.3 macOS build.
 
 The webview records voice notes, so `src-tauri/Info.plist` carries the microphone
 usage string and `src-tauri/Entitlements.plist` grants the hardened-runtime audio
@@ -154,8 +153,8 @@ Set the release secrets (repository → Settings → Secrets and variables → A
 2. Commit, then tag and push:
 
    ```sh
-   git tag v0.2.2
-   git push origin v0.2.2
+   git tag v0.2.3
+   git push origin v0.2.3
    ```
 
 3. The workflow creates a **draft** GitHub release with the bundles, updater

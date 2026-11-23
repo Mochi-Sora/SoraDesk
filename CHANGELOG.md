@@ -2,7 +2,7 @@
 
 All notable changes to SoraDesk are documented here.
 
-## [Unreleased]
+## [0.2.3] - 2026-11-23
 
 ### Fixed
 
@@ -20,6 +20,10 @@ All notable changes to SoraDesk are documented here.
   backticks.
 - Memories: the card grid uses wider columns, keeping a 4×2 layout on desktop and
   two columns at the minimum width without splitting paths mid-word.
+
+### Changed
+
+- App, protocol, Tauri, Cargo, and bridge versions are 0.2.3.
 
 ## [0.2.2] - 2026-11-17
 
